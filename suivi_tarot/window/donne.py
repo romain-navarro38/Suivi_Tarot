@@ -9,6 +9,8 @@ from api.calcul import calcul_donne
 
 # noinspection PyAttributeOutsideInit
 class DetailsWindow(QWidget):
+    """Fenêtre permettant la création ou la modification d'une donne
+    pour la session en cours"""
 
     donne_valid = Signal(list, int, list)
 
@@ -97,6 +99,7 @@ class DetailsWindow(QWidget):
         self.le_point.setMaximumSize(QSize(32, 16777215))
         self.le_point.setAlignment(Qt.AlignCenter)
         self.le_point.setPlaceholderText("0")
+        # regex acceptant seulement les nombres entre 0 et 91 par pas de 0.5 ('.' ou ',' accepté)
         pointValidator = QRegularExpressionValidator()
         pointValidator.setRegularExpression(r"(([0-8]?\d?((\.|,)[5])?)|([9][0]((\.|,)[5])?)|[9][1])")
         self.le_point.setValidator(pointValidator)
@@ -261,6 +264,8 @@ class DetailsWindow(QWidget):
         self.cbx_gd_chelem.currentIndexChanged.connect(self.verif_complet)
 
     def affichage_modif(self):
+        """Affiche les paramètres d'une donne en particulier lorsque
+        la fenêtre est appelée en mode modification."""
         self.cbx_preneur.setCurrentText(self.modif[0])
         self.cbx_contrat.setCurrentText(self.modif[1])
         self.cbx_bout.setCurrentText(self.modif[2])
@@ -279,6 +284,7 @@ class DetailsWindow(QWidget):
             self.cbx_gd_chelem.setCurrentText(self.modif[7])
 
     def valider_donne(self):
+        """Emet avant fermeture de la fenêtre les paramètres de la donne."""
         if self.pnj:
             liste = [self.pnj,
                      self.preneur,
@@ -317,17 +323,8 @@ class DetailsWindow(QWidget):
         self.donne_valid.emit(liste, self.ligne_donne, repartition)
         self.close()
 
-    def fill_cbx_preneur_appele(self, list_p, list_a):
-        self.traitement = True
-        self.cbx_preneur.clear()
-        self.cbx_preneur.addItems(list_p)
-        if self.nb_joueurs > 4:
-            self.cbx_appele.clear()
-            self.cbx_appele.addItems(list_a)
-            self.cbx_appele.addItems(["Chien", "Solo"])
-        self.traitement = False
-
     def point_attaque_def(self):
+        """Change, entre attaque et défense, la signication des points saisies."""
         if self.btn_attaque_def.text() == "Att":
             self.point_de_lattaque = False
             self.btn_attaque_def.setText("Def")
@@ -337,6 +334,8 @@ class DetailsWindow(QWidget):
         self.verif_complet()
 
     def verif_complet(self):
+        """Appel la méthode d'activation du bouton valider si les champs
+        obligatoires sont renseignés et les règles de validations respectées"""
         self.preneur = self.cbx_preneur.currentText()
         self.contrat = self.cbx_contrat.currentText()
         self.bout = self.cbx_bout.currentText()
@@ -364,6 +363,8 @@ class DetailsWindow(QWidget):
             self.activation_btn_valider(False)
 
     def activation_btn_valider(self, actif):
+        """Active ou pas le bouton valider et affiche
+        la répartition des points entre attaque et défense."""
         if actif:
             self.btn_valider.setEnabled(True)
             resultat = self.calcul()
@@ -394,10 +395,13 @@ class DetailsWindow(QWidget):
             self.lbl_result_defense.setText("")
 
     def calcul(self):
+        """Retourne les points de la donne en cours."""
         return calcul_donne(self.contrat, self.bout, self.point,
                             self.poignee, self.petit, self.pt_che, self.gd_che)
 
     def maj_preneur_appele(self):
+        """Met à jour les combobox preneur et appele entre elles :
+        sélection d'une valeur dans l'une implique le retrait de cette dernière dans l'autre."""
         if self.traitement:
             return
 
@@ -419,6 +423,18 @@ class DetailsWindow(QWidget):
         self.traitement = False
 
         self.verif_complet()
+
+    def fill_cbx_preneur_appele(self, list_p, list_a):
+        """Affiche dans les comboxbox preneur et appele la liste des joueurs
+        disponibles pour chacun."""
+        self.traitement = True
+        self.cbx_preneur.clear()
+        self.cbx_preneur.addItems(list_p)
+        if self.nb_joueurs > 4:
+            self.cbx_appele.clear()
+            self.cbx_appele.addItems(list_a)
+            self.cbx_appele.addItems(["Chien", "Solo"])
+        self.traitement = False
 
 
 if __name__ == '__main__':

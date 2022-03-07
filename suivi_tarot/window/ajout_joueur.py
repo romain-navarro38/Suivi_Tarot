@@ -8,6 +8,8 @@ from database.clients import get_joueur, ajout_joueur
 
 # noinspection PyAttributeOutsideInit
 class AjoutJoueurWindow(QWidget):
+    """Fenêtre permetant l'ajout d'un nouveau joueur.
+    Seul le pseudo d'un minimum de 4 caractères est obligatoire"""
 
     new_pseudo = Signal(dict)
     etat_fenetre = Signal(bool)
@@ -37,7 +39,7 @@ class AjoutJoueurWindow(QWidget):
         self.btn_annuler = QPushButton("Annuler")
 
     def modify_widgets(self):
-        self.le_pseudo.setPlaceholderText("5 caractères min.")
+        self.le_pseudo.setPlaceholderText("4 caractères min.")
         self.le_nom.setPlaceholderText("facultatif")
         self.le_prenom.setPlaceholderText("facultatif")
         self.chk_actif.setChecked(True)
@@ -62,8 +64,10 @@ class AjoutJoueurWindow(QWidget):
         self.btn_annuler.clicked.connect(self.close)
 
     def valider(self):
+        """Si pas déjà présent dans la bdd, crée un nouveau joueur dans la bdd
+        et l'affiche dans la fenêtre parent"""
         joueurs = [pseudo[0] for pseudo in get_joueur()]
-        if len(self.le_pseudo.text()) > 4 and \
+        if len(self.le_pseudo.text()) > 3 and \
            self.le_pseudo.text().lower() not in [joueur.lower() for joueur in joueurs]:
 
             actif = 1 if self.chk_actif.isChecked() else 0
@@ -78,12 +82,14 @@ class AjoutJoueurWindow(QWidget):
             self.new_pseudo.emit(joueur_dict)
 
     def clear_le(self):
+        """Remise à zero de la fenêtre"""
         self.le_pseudo.setText("")
         self.le_nom.setText("")
         self.le_prenom.setText("")
         self.chk_actif.setChecked(True)
 
     def closeEvent(self, event: QCloseEvent) -> None:
+        """Signale à la fenêtre parent la fermeture de celle-ci"""
         self.etat_fenetre.emit(False)
         super().closeEvent(event)
 

@@ -1,7 +1,8 @@
 from math import ceil, floor
 
 
-def calcul_donne(contrat, bout, point, poignee, petit, pt_che, gd_che):
+def calcul_donne(contrat: str, bout: str, point: float,
+                 poignee: str, petit: str, pt_che: str, gd_che: str):
     """Retourne le résultat d'une donne"""
     coef = valeur_contrat(contrat)
     cible = valeur_cible(bout)

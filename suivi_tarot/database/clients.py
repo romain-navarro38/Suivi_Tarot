@@ -8,6 +8,7 @@ def verif_bdd_exist():
     return DATA_FILE.exists()
 
 def init_bdd():
+    """Crée une bdd vierge"""
     db = sqlite3.connect(DATA_FILE)
     c = db.cursor()
     c.execute(T_JOUEUR)
@@ -54,9 +55,11 @@ def ajout_session(**session):
     db.close()
 
 def get_last_id(cursor):
+    """Retourne le dernier id créé dans la bdd"""
     return cursor.execute("SELECT last_insert_rowid()").fetchone()[0]
 
 def get_id_joueur(cursor, pseudo):
+    """Retourne l'id d'un joueur à partir de son pseudo et du cursor d'une connexion sqlite3"""
     return cursor.execute(f"SELECT id FROM joueur WHERE pseudo='{pseudo}'").fetchone()[0]
 
 def insert_donne_joueur(cursor, id_donne, table, pseudo):
@@ -64,6 +67,7 @@ def insert_donne_joueur(cursor, id_donne, table, pseudo):
     cursor.execute(f"INSERT INTO {table} (donne, joueur) VALUES ({id_donne}, {id_joueur})")
 
 def get_joueur_actif():
+    """Retourne la liste des joueurs actifs"""
     db = sqlite3.connect(DATA_FILE)
     c = db.cursor()
     c.execute("SELECT pseudo FROM joueur WHERE actif=1 AND protege=0")
@@ -72,6 +76,7 @@ def get_joueur_actif():
     return joueur
 
 def get_joueur_inactif():
+    """Retourne la liste des joueurs inactifs"""
     db = sqlite3.connect(DATA_FILE)
     c = db.cursor()
     c.execute("SELECT pseudo FROM joueur WHERE actif=0 AND protege=0")
@@ -80,6 +85,7 @@ def get_joueur_inactif():
     return joueur
 
 def get_joueur():
+    """Retourne la liste de tous les joueurs"""
     db = sqlite3.connect(DATA_FILE)
     c = db.cursor()
     c.execute("SELECT pseudo FROM joueur")
@@ -88,6 +94,8 @@ def get_joueur():
     return joueurs
 
 def maj_status_joueurs(joueur_status: dict):
+    """Met à jour le champ actif d'un ou plusieurs joueurs
+    à partir d'un dictionnaire du type {"pseudo": 0 ou 1}"""
     db = sqlite3.connect(DATA_FILE)
     c = db.cursor()
     for pseudo, status in joueur_status.items():
@@ -96,6 +104,9 @@ def maj_status_joueurs(joueur_status: dict):
     db.close()
 
 def ajout_joueur(joueur: dict):
+    """Ajoute un joueur à la bdd à partir d'un dictionnaire du type
+    {"pseudo": str, "nom": str, "prenom": str, "actif": 0 ou 1}.
+    Le champ protege sera à 0"""
     db = sqlite3.connect(DATA_FILE)
     c = db.cursor()
     c.execute("""
@@ -106,6 +117,7 @@ def ajout_joueur(joueur: dict):
     db.close()
 
 
+# Si aucune bdd trouvée à initialisation de l'app, une vierge est créée
 if not verif_bdd_exist():
     init_bdd()
 
