@@ -12,6 +12,8 @@ from api.utils import IMAGE_FOLDER
 
 # noinspection PyAttributeOutsideInit
 class GestionJoueurWindow(QWidget):
+    """Fenêtre permettant l'ajout de nouveau joueur et leur passage de la
+    catégorie actif à inactif et vice-versa"""
     def __init__(self, parent=None):
         super().__init__()
 
@@ -81,27 +83,34 @@ class GestionJoueurWindow(QWidget):
         self.btn_annuler.clicked.connect(self.close)
 
     def ajouter_joueur(self):
+        """Ouvre la fenêtre de création de nouveau joueur"""
         self.new_joueur = AjoutJoueurWindow()
         self.new_joueur.new_pseudo.connect(self.ajouter_pseudo_a_liste)
         self.new_joueur.etat_fenetre.connect(self.maj_etat_fenetre)
         self.new_joueur.show()
 
     def ajouter_pseudo_a_liste(self, joueur):
+        """Ajoute un joueur à une des listes actif ou inactif après sa création."""
         if joueur["actif"]:
             self.lw_actif.addItem(joueur["pseudo"])
         else:
             self.lw_inactif.addItem(joueur["pseudo"])
 
     def maj_etat_fenetre(self, etat):
+        """Renseigne l'état de la fenêtre de création de joueur permet de
+        savoir s'il faut fermer cette dernière lorsque la fenêtre est fermée."""
         self.new_joueur = etat
 
     def closeEvent(self, event: QCloseEvent) -> None:
+        """À la fermeture de la fenêtre, ferme également celle
+        de création de joueur si elle est ouverte"""
         if self.new_joueur:
             self.new_joueur.close()
         self.parent.setVisible(True)
         super().closeEvent(event)
 
     def transfert_unique(self, lw: str, item: QListWidgetItem):
+        """Bascule l'item double-cliqué d'une liste à l'autre"""
         if lw == "inactif":
             lw_depart = self.lw_inactif
             lw_arrive = self.lw_actif
@@ -116,6 +125,7 @@ class GestionJoueurWindow(QWidget):
         lw_arrive.addItem(lw_depart.takeItem(row))
 
     def transfert_global(self):
+        """Bascule tous les items sélectionnés entre les deux listes"""
         for item in self.lw_inactif.selectedItems():
             row = self.lw_inactif.row(item)
             self.modif[item.text()] = 1
@@ -126,6 +136,7 @@ class GestionJoueurWindow(QWidget):
             self.lw_inactif.addItem(self.lw_actif.takeItem(row))
 
     def save_changement(self):
+        """Sauvegarde en bdd l'attribut actif de chaque joueur"""
         if self.modif:
             maj_status_joueurs(self.modif)
             self.close()

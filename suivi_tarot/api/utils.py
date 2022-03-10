@@ -37,7 +37,7 @@ EN_TETE_6 = ["PNJ",
              "Pt Chelem",
              "Gr Chelem"]
 
-TETE = ["R \u2665",  # coeur
+TETE = ["R \u2665",  # cœur
         "R \u2666",  # carreau
         "R \u2663",  # trefle
         "R \u2660",  # pique

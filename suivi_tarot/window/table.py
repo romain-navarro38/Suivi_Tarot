@@ -34,6 +34,8 @@ class LabelScore(QLabel):
 
 # noinspection PyAttributeOutsideInit
 class TableWindow(QWidget):
+    """Fenêtre représentant une session où les donnes associées sont
+    représentées par une ligne d'un QTableWidget"""
 
     refresh_graph = Signal(dict, int)
 
@@ -42,7 +44,7 @@ class TableWindow(QWidget):
 
         self.joueurs = joueurs
         self.pnj = list(joueurs)
-        self.nb_joueurs = len(joueurs)
+        self.nombre_joueurs = len(joueurs)
         self.score = {k: [0] for k in joueurs}
         self.score_cumul = dict(self.score)
 
@@ -64,7 +66,7 @@ class TableWindow(QWidget):
         self.graph = GraphSession(self)
         self.graph.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
         self.lbl_joueur = [LabelScore(f"{joueur} :", "label") for joueur in self.joueurs]
-        self.lbl_score = [LabelScore("0", "form") for _ in range(self.nb_joueurs)]
+        self.lbl_score = [LabelScore("0", "form") for _ in range(self.nombre_joueurs)]
         self.spacer_haut = QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.spacer_bas = QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -93,7 +95,7 @@ class TableWindow(QWidget):
         self.main_layout.addLayout(self.bouton_layout)
 
         self.graph_score_layout.addWidget(self.graph)
-        for i in range(self.nb_joueurs):
+        for i in range(self.nombre_joueurs):
             self.score_layout.addWidget(self.lbl_joueur[i], i, 0)
             self.score_layout.addWidget(self.lbl_score[i], i, 1)
         self.vertical_score_layout.addSpacerItem(self.spacer_haut)
@@ -108,29 +110,35 @@ class TableWindow(QWidget):
         self.btn_valid_session.clicked.connect(self.valid_session)
 
     def new_ligne(self, row):
+        """Insére une nouvelle ligne dans QTableWidget"""
         self.tab_donne.insertRow(row)
         self.tab_donne.setRowHeight(row, 15)
         for i in range(self.tab_donne.columnCount()):
             label = QLabel("")
             label.setAlignment(Qt.AlignCenter)
             self.tab_donne.setCellWidget(row, i, label)
-        if self.nb_joueurs > 5:
+        if self.nombre_joueurs > 5:
             self.tirage_pnj(row)
 
     def tirage_pnj(self, row):
+        """Pour les sessions à 6 joueurs : tirage au sort d'un joueur qui devient
+        pnj (personne non-joueur) de la donne"""
         pnj = self.pnj.pop(self.pnj.index(choice(self.pnj)))
         self.tab_donne.cellWidget(row, 0).setText(pnj)
         if len(self.pnj) == 0:
             self.pnj = list(self.joueurs)
 
     def affichage_entete(self):
-        if self.nb_joueurs < 5:
+        """Retourne l'entête adapté au nombre de joueurs"""
+        if self.nombre_joueurs < 5:
             return EN_TETE_3_4
-        elif self.nb_joueurs == 5:
+        elif self.nombre_joueurs == 5:
             return EN_TETE_5
         return EN_TETE_6
 
     def retour_donne(self, param_donne, row, point):
+        """Récupère les infos de la fenêtre de saisi d'une donne,
+        les ajoute au QTableWidget et lance les mises à jour graph et scores"""
         for column in range(self.tab_donne.columnCount()):
             self.tab_donne.cellWidget(row, column).setText(
                 str(param_donne[column]))
@@ -147,8 +155,12 @@ class TableWindow(QWidget):
             self.tab_donne.scrollToBottom()
 
     def dispatch_action(self, row, column=1):
+        """Lance en fonction l'interaction de l'utilisateur :
+            - Fenêtre pnj pour le remplacer (conditions : 6 joueurs, aucune donne jouée)
+            - Fenêtre donne en mode ajout (conditions : btn_ajout_donne ou double clic dernière ligne)
+            - Fenêtre donne en mode modif (condition : double clic sur une ligne renseignée)"""
         if (
-            self.nb_joueurs > 5
+            self.nombre_joueurs > 5
             and self.tab_donne.rowCount() == 1
             and row == 0
             and column == 0
@@ -167,12 +179,14 @@ class TableWindow(QWidget):
             self.lancement_donne(row)
 
     def remplace_pnj(self, pnj):
+        """Pour les sessions à 6 joueurs, remplace le pnj de la première donne."""
         self.tab_donne.cellWidget(0, 0).setText(pnj)
         self.pnj = list(self.joueurs)
         self.pnj.remove(pnj)
 
     def lancement_donne(self, row):
-        pnj = self.tab_donne.cellWidget(row, 0).text() if self.nb_joueurs > 5 else ""
+        """Ouvre la fenêtre de saisi d'une donne en mode création ou ajout."""
+        pnj = self.tab_donne.cellWidget(row, 0).text() if self.nombre_joueurs > 5 else ""
         joueurs_donne = list(self.joueurs)
         if pnj:
             joueurs_donne.remove(pnj)
@@ -182,19 +196,21 @@ class TableWindow(QWidget):
         self.donne.show()
 
     def get_valeur_donne(self, row):
-        if self.nb_joueurs < 5:
+        """Récupère les données d'une ligne du QTableWidget"""
+        if self.nombre_joueurs < 5:
             return (self.tab_donne.cellWidget(row, c).text() for c in range(8))
-        elif self.nb_joueurs == 5:
+        elif self.nombre_joueurs == 5:
             return (self.tab_donne.cellWidget(row, c).text() for c in range(10))
         else:
             return (self.tab_donne.cellWidget(row, c).text() for c in range(1, 11))
 
     def attibution_points(self, param, row, point):
-        if self.nb_joueurs > 5:
+        """Met à jour les scores des joueurs"""
+        if self.nombre_joueurs > 5:
             pnj = param[0]
             preneur = param[1]
             appele = param[6]
-        elif self.nb_joueurs == 5:
+        elif self.nombre_joueurs == 5:
             pnj = [""]
             preneur = param[0]
             appele = param[5]
@@ -210,7 +226,7 @@ class TableWindow(QWidget):
                     action, self.score[joueur], point[2], row + 1)
             elif joueur == pnj:
                 liste = self.ajouter_remplacer_val_liste(
-                    action, self.score[joueur], 0, row + 1)
+                    action, self.score[joueur], "0", row + 1)
             elif joueur == preneur:
                 liste = self.ajouter_remplacer_val_liste(
                     action, self.score[joueur], point[0], row + 1)
@@ -221,7 +237,8 @@ class TableWindow(QWidget):
             self.score[joueur] = liste
 
     @staticmethod
-    def ajouter_remplacer_val_liste(choix, liste, valeur, index_):
+    def ajouter_remplacer_val_liste(choix: str, liste: list[int], valeur: str, index_: int) -> list[int]:
+        """Retourne une liste de score après lui avoir ajouté ou modifié une valeur"""
         valeur = int(valeur)
         if choix == "ajout":
             liste.append(valeur)
@@ -230,7 +247,8 @@ class TableWindow(QWidget):
         return liste
 
     @staticmethod
-    def cumuler_score(score):
+    def cumuler_score(score: dict) -> dict:
+        """Retourne un dictionnaire"""
         cumul_dict = {}
         for joueur, valeurs in score.items():
             cumul = 0
@@ -242,38 +260,41 @@ class TableWindow(QWidget):
         return cumul_dict
 
     def affichage_score(self):
+        """Met à jour les labels score de chaque joueur puis les déplacent
+        dans le grid layout pour les mettre en ordre décroissant"""
         for i, liste in enumerate(self.score_cumul.values()):
             self.lbl_score[i].setText(str(liste[-1]))
 
         liste = [(self.score_layout.itemAtPosition(i, 0).widget(),
                   int(self.score_layout.itemAtPosition(i, 1).widget().text()),
                   self.score_layout.itemAtPosition(i, 1).widget())
-                 for i in range(self.nb_joueurs)]
+                 for i in range(self.nombre_joueurs)]
         classement = sorted(liste, key=lambda v: v[1], reverse=True)
 
-        for i in range(self.nb_joueurs):
+        for i in range(self.nombre_joueurs):
             self.score_layout.addWidget(classement[i][0], i, 0)
             self.score_layout.addWidget(classement[i][2], i, 1)
 
     def valid_session(self):
+        """Enregistre en bdd la session et donnes associées"""
         if self.tab_donne.rowCount() <= 2:
             return
         session = {"date_": dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
-                   "table_": self.nb_joueurs if self.nb_joueurs < 6 else 5,
+                   "table_": self.nombre_joueurs if self.nombre_joueurs < 6 else 5,
                    "joueurs": self.joueurs,
                    "nb_donne": self.tab_donne.rowCount() - 1}
 
         column = ["preneur", "contrat", "nb_bout", "point", "poignee", "petit", "pt_chelem", "gd_chelem"]
-        if self.nb_joueurs > 4:
+        if self.nombre_joueurs > 4:
             column.insert(4, "tete")
             column.insert(5, "appele")
 
         for i, row in enumerate(list(range(self.tab_donne.rowCount() - 1))):
             liste = list(self.get_valeur_donne(row))
             dict_donne = dict(zip(column, liste))
-            if self.nb_joueurs < 5:
+            if self.nombre_joueurs < 5:
                 dict_donne["tete"] = ""
-            if self.nb_joueurs == 6:
+            if self.nombre_joueurs == 6:
                 dict_donne["pnj"] = self.tab_donne.cellWidget(row, 0).text()
             session[f"d{i}"] = dict_donne
 

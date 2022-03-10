@@ -8,6 +8,7 @@ from window.table import TableWindow
 
 # noinspection PyAttributeOutsideInit
 class SelectJoueurWindow(QWidget):
+    """Fenêtre de sélection des joueurs participants à la session"""
     def __init__(self):
         super().__init__()
 
@@ -55,6 +56,7 @@ class SelectJoueurWindow(QWidget):
         self.btn_annuler.clicked.connect(self.close)
 
     def select_valid(self):
+        """Active ou non le bouton valider en fonction du nombre de joueurs sélectionnés"""
         liste = {elem.text() for elem in self.lw_joueur.selectedItems()}
         if liste - self.selected:
             pseudo = (liste - self.selected).pop()
@@ -81,6 +83,7 @@ class SelectJoueurWindow(QWidget):
             self.btn_valider.setEnabled(False)
 
     def lancement_session(self):
+        """Ouvre la fenêtre d'enregistrement d'une session"""
         joueur_table = []
         i = 1
         while self.ordre:

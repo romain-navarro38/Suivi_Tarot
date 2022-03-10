@@ -4,6 +4,8 @@ from PySide6.QtWidgets import QWidget, QLabel, QListWidget, QPushButton, QVBoxLa
 
 # noinspection PyAttributeOutsideInit
 class PnjWindow(QWidget):
+    """Fenêtre permettant de changer le pnj tiré au hasard pour la première
+    donne d'une session de 6 joueurs"""
 
     select_joueur = Signal(str)
 
@@ -41,6 +43,7 @@ class PnjWindow(QWidget):
         self.lw_pnj.doubleClicked.connect(self.selection_pnj)
 
     def selection_pnj(self):
+        """Emet vers la fenêtre parente le pseudo du pnj sélectionné"""
         if self.lw_pnj.selectedItems():
             self.select_joueur.emit(self.lw_pnj.currentItem().text())
             self.close()

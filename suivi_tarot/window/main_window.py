@@ -15,6 +15,7 @@ class CustomButton(QPushButton):
 
 # noinspection PyAttributeOutsideInit
 class MainWindow(QWidget):
+    """Fenêtre principal servant de hub aux différentes fonctionnalités"""
     def __init__(self):
         super().__init__()
 
