@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 CUR_FILE = Path(__file__)
 DATA_FOLDER = CUR_FILE.parent.parent.parent
 DATA_FILE = DATA_FOLDER / "db.sqlite3"
@@ -11,8 +12,8 @@ EN_TETE_3_4 = ["Preneur",
                "Point",
                "Poignée",
                "Petit au bout",
-               "Pt Chelem",
-               "Gr Chelem"]
+               "Petit Chelem",
+               "Grand Chelem"]
 
 EN_TETE_5 = ["Preneur",
              "Contrat",
@@ -22,8 +23,8 @@ EN_TETE_5 = ["Preneur",
              "Appelé",
              "Poignée",
              "Petit au bout",
-             "Pt Chelem",
-             "Gr Chelem"]
+             "Petit Chelem",
+             "Grand Chelem"]
 
 EN_TETE_6 = ["PNJ",
              "Preneur",
@@ -34,8 +35,8 @@ EN_TETE_6 = ["PNJ",
              "Appelé",
              "Poignée",
              "Petit au bout",
-             "Pt Chelem",
-             "Gr Chelem"]
+             "Petit Chelem",
+             "Grand Chelem"]
 
 TETE = ["R \u2665",  # cœur
         "R \u2666",  # carreau
