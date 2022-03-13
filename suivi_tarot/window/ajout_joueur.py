@@ -3,7 +3,8 @@ from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QCheckBox, QPushButton, QFormLayout, \
     QVBoxLayout, QHBoxLayout
 
-from database.clients import get_joueur, ajout_joueur
+from database.clients import ajout_joueur
+from api.verification import joueur_is_valid
 
 
 # noinspection PyAttributeOutsideInit
@@ -66,11 +67,8 @@ class AjoutJoueurWindow(QWidget):
     def valider(self):
         """Si pas déjà présent dans la bdd, crée un nouveau joueur dans la bdd
         et l'affiche dans la fenêtre parent"""
-        joueurs = [pseudo[0] for pseudo in get_joueur()]
-        if len(self.le_pseudo.text()) > 3 and \
-           self.le_pseudo.text().lower() not in [joueur.lower() for joueur in joueurs]:
-
-            actif = 1 if self.chk_actif.isChecked() else 0
+        if joueur_is_valid(self.le_pseudo.text()):
+            actif = int(self.chk_actif.isChecked())
 
             joueur_dict = {"pseudo": self.le_pseudo.text(),
                            "nom": self.le_nom.text(),
@@ -78,10 +76,10 @@ class AjoutJoueurWindow(QWidget):
                            "actif": actif}
 
             ajout_joueur(joueur_dict)
-            self.clear_le()
+            self.clear_line_edit()
             self.new_pseudo.emit(joueur_dict)
 
-    def clear_le(self):
+    def clear_line_edit(self):
         """Remise à zero de la fenêtre"""
         self.le_pseudo.setText("")
         self.le_nom.setText("")

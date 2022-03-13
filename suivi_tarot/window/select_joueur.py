@@ -12,8 +12,8 @@ class SelectJoueurWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.selected = set()
-        self.ordre = {}
+        self.selected_players = set()
+        self.selection_order = {}
         self.resize(176, 344)
         self.setWindowTitle("Sélection des joueurs")
         self.setup_ui()
@@ -51,53 +51,61 @@ class SelectJoueurWindow(QWidget):
         self.main_layout.addLayout(self.bouton_layout)
 
     def setup_connections(self):
-        self.lw_joueur.itemSelectionChanged.connect(self.select_valid)
+        self.lw_joueur.itemSelectionChanged.connect(self.selection_joueur)
         self.btn_valider.clicked.connect(self.lancement_session)
         self.btn_annuler.clicked.connect(self.close)
 
-    def select_valid(self):
-        """Active ou non le bouton valider en fonction du nombre de joueurs sélectionnés"""
-        liste = {elem.text() for elem in self.lw_joueur.selectedItems()}
-        if liste - self.selected:
-            pseudo = (liste - self.selected).pop()
-            self.selected.add(pseudo)
-            self.ordre[pseudo] = len(self.selected)
-        else:
-            pseudo = (self.selected - liste).pop()
-            self.selected.remove(pseudo)
-            rang = self.ordre[pseudo]
-            del self.ordre[pseudo]
-            for cle in self.ordre:
-                if self.ordre[cle] > rang:
-                    self.ordre[cle] -= 1
+    def selection_joueur(self):
+        """Lance les actions après un changement de sélection dans le ListWidget"""
+        self.order_of_selection()
+        self.maj_interface()
 
-        nb_select = len(self.selected)
-        if nb_select > 1:
-            self.lbl_nb_joueur.setText(f"{nb_select} sélectionnés")
-        else:
-            self.lbl_nb_joueur.setText(f"{nb_select} sélectionné")
+    def maj_interface(self):
+        """Active ou non le bouton valider en fonction du nombre de joueurs sélectionnés
+        et affichage de ce dernier"""
+        nb_select = len(self.selected_players)
 
-        if 2 < nb_select < 7:
-            self.btn_valider.setEnabled(True)
+        self.btn_valider.setEnabled(2 < nb_select < 7)
+        self.lbl_nb_joueur.setText(f"{nb_select} sélectionné{'s' if nb_select > 1 else ''}")
+
+    def order_of_selection(self):
+        """Sauvegarde de l'ordre dans lequel les pseudos sont sélectionnés"""
+        new_selected_players = {elem.text() for elem in self.lw_joueur.selectedItems()}
+        if new_selected_players - self.selected_players:
+            pseudo = (new_selected_players - self.selected_players).pop()
+            self.selected_players.add(pseudo)
+            self.selection_order[pseudo] = len(self.selected_players)
         else:
-            self.btn_valider.setEnabled(False)
+            pseudo = (self.selected_players - new_selected_players).pop()
+            self.selected_players.remove(pseudo)
+            rang = self.selection_order[pseudo]
+            del self.selection_order[pseudo]
+            for cle in self.selection_order:
+                if self.selection_order[cle] > rang:
+                    self.selection_order[cle] -= 1
 
     def lancement_session(self):
         """Ouvre la fenêtre d'enregistrement d'une session"""
-        joueur_table = []
-        i = 1
-        while self.ordre:
-            for pseudo, rang in self.ordre.items():
-                if self.ordre[pseudo] == i:
-                    joueur_table.append(pseudo)
-                    del self.ordre[pseudo]
-                    break
-            i += 1
+        joueur_table = self.create_list_player_sorted()
 
         self.table = TableWindow(joueur_table)
         self.table.setWindowModality(Qt.ApplicationModal)
         self.close()
         self.table.show()
+
+    def create_list_player_sorted(self):
+        """Création de la liste des pseudos dans l'ordre où ils ont été sélectionnés"""
+        list_sorted = []
+        i = 1
+        while self.selection_order:
+            for pseudo, rang in self.selection_order.items():
+                if self.selection_order[pseudo] == i:
+                    list_sorted.append(pseudo)
+                    del self.selection_order[pseudo]
+                    break
+            i += 1
+
+        return list_sorted
 
 
 if __name__ == '__main__':

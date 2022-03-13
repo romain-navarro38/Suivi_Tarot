@@ -10,9 +10,9 @@ class CoefContrat(Enum):
 
 class Poignee(Enum):
     """Enumération des annonces de poignée possibles associés à leur valeur"""
-    Simple = 20
-    Double = 30
-    Triple = 40
+    Simple = 20  # nombre d'atouts : 18 à 3 joueurs, 15 à 4 joueurs ou 13 à 5 joueurs
+    Double = 30  # 15, 13 ou 10
+    Triple = 40  # 13, 10 ou 8
 
 
 def calcul_donne(contrat: str, bout: str, point: float, poignee: str,
@@ -89,3 +89,6 @@ def ajout_grand_chelem(annonce: str, signe: int) -> int:
         "Raté": 400
     }
     return valeur[annonce] * signe
+
+def point_preneur_float(point: str, preneur: bool) -> float:
+    return float(point) if preneur else 91 - float(point)

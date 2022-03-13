@@ -123,4 +123,3 @@ if not verif_bdd_exist():
 
 if __name__ == '__main__':
     pass
-

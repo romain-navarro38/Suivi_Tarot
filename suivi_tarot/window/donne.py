@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushBu
 from PySide6.QtCore import Qt, QSize, Signal
 
 from api.utils import TETE
-from api.calcul import calcul_donne
+from api.calcul import calcul_donne, point_preneur_float
 
 
 # noinspection PyAttributeOutsideInit
@@ -252,16 +252,16 @@ class DetailsWindow(QWidget):
         self.btn_valider.clicked.connect(self.valider_donne)
         self.btn_annuler.clicked.connect(self.close)
         self.cbx_preneur.currentIndexChanged.connect(self.maj_preneur_appele)
-        self.cbx_contrat.currentIndexChanged.connect(self.verif_complet)
-        self.cbx_bout.currentIndexChanged.connect(self.verif_complet)
-        self.le_point.textChanged.connect(self.verif_complet)
+        self.cbx_contrat.currentIndexChanged.connect(self.check_complete)
+        self.cbx_bout.currentIndexChanged.connect(self.check_complete)
+        self.le_point.textChanged.connect(self.check_complete)
         self.btn_attaque_def.clicked.connect(self.point_attaque_def)
-        self.cbx_tete.currentIndexChanged.connect(self.verif_complet)
+        self.cbx_tete.currentIndexChanged.connect(self.check_complete)
         self.cbx_appele.currentIndexChanged.connect(self.maj_preneur_appele)
-        self.cbx_poignee.currentIndexChanged.connect(self.verif_complet)
-        self.cbx_petit.currentIndexChanged.connect(self.verif_complet)
-        self.cbx_pt_chelem.currentIndexChanged.connect(self.verif_complet)
-        self.cbx_gd_chelem.currentIndexChanged.connect(self.verif_complet)
+        self.cbx_poignee.currentIndexChanged.connect(self.check_complete)
+        self.cbx_petit.currentIndexChanged.connect(self.check_complete)
+        self.cbx_pt_chelem.currentIndexChanged.connect(self.check_complete)
+        self.cbx_gd_chelem.currentIndexChanged.connect(self.check_complete)
 
     def affichage_modif(self):
         """Affiche les paramètres d'une donne en particulier lorsque
@@ -286,69 +286,58 @@ class DetailsWindow(QWidget):
     def valider_donne(self):
         """Emet avant fermeture de la fenêtre les paramètres de la donne."""
         if self.pnj:
-            liste = [self.pnj,
-                     self.preneur,
-                     self.contrat,
-                     self.bout,
-                     self.point,
-                     self.tete,
-                     self.appele,
-                     self.poignee,
-                     self.petit,
-                     self.pt_che,
-                     self.gd_che]
+            param_donne = [self.pnj,
+                           self.preneur,
+                           self.contrat,
+                           self.bout,
+                           self.point,
+                           self.tete,
+                           self.appele,
+                           self.poignee,
+                           self.petit,
+                           self.pt_che,
+                           self.gd_che]
         elif self.nb_joueurs == 5:
-            liste = [self.preneur,
-                     self.contrat,
-                     self.bout,
-                     self.point,
-                     self.tete,
-                     self.appele,
-                     self.poignee,
-                     self.petit,
-                     self.pt_che,
-                     self.gd_che]
+            param_donne = [self.preneur,
+                           self.contrat,
+                           self.bout,
+                           self.point,
+                           self.tete,
+                           self.appele,
+                           self.poignee,
+                           self.petit,
+                           self.pt_che,
+                           self.gd_che]
         else:
-            liste = [self.preneur,
-                     self.contrat,
-                     self.bout,
-                     self.point,
-                     self.poignee,
-                     self.petit,
-                     self.pt_che,
-                     self.gd_che]
+            param_donne = [self.preneur,
+                           self.contrat,
+                           self.bout,
+                           self.point,
+                           self.poignee,
+                           self.petit,
+                           self.pt_che,
+                           self.gd_che]
         repartition = [self.lbl_result_preneur.text(),
                        self.lbl_result_appele.text(),
                        self.lbl_result_defense.text()]
-        self.donne_valid.emit(liste, self.ligne_donne, repartition)
+        self.donne_valid.emit(param_donne, self.ligne_donne, repartition)
         self.close()
 
     def point_attaque_def(self):
         """Change, entre attaque et défense, la signication des points saisies."""
-        if self.btn_attaque_def.text() == "Att":
-            self.point_de_lattaque = False
-            self.btn_attaque_def.setText("Def")
-        else:
-            self.point_de_lattaque = True
-            self.btn_attaque_def.setText("Att")
-        self.verif_complet()
+        is_attaque = self.btn_attaque_def.text() == "Att"
+        self.point_de_lattaque = not is_attaque
+        self.btn_attaque_def.setText("Def" if is_attaque else "Att")
 
-    def verif_complet(self):
+        self.check_complete()
+
+    def check_complete(self):
         """Appel la méthode d'activation du bouton valider si les champs
         obligatoires sont renseignés et les règles de validations respectées"""
-        self.preneur = self.cbx_preneur.currentText()
-        self.contrat = self.cbx_contrat.currentText()
-        self.bout = self.cbx_bout.currentText()
-        self.point = self.le_point.text()
-        self.tete = self.cbx_tete.currentText() if self.nb_joueurs > 4 else "none"
-        self.appele = self.cbx_appele.currentText() if self.nb_joueurs > 4 else "none"
-        self.poignee = self.cbx_poignee.currentText()
-        self.petit = self.cbx_petit.currentText()
-        self.pt_che = self.cbx_pt_chelem.currentText()
-        self.gd_che = self.cbx_gd_chelem.currentText()
+        self.get_values_from_text_fields()
 
         if all([self.preneur, self.contrat, self.bout, self.point, self.tete, self.appele]):
-            self.point = 91 - float(self.point) if not self.point_de_lattaque else float(self.point)
+            self.point = point_preneur_float(self.point, self.point_de_lattaque)
             if (
                     all([self.pt_che, self.gd_che])
                     or self.point < 69
@@ -362,42 +351,61 @@ class DetailsWindow(QWidget):
         else:
             self.activation_btn_valider(False)
 
+    def get_values_from_text_fields(self):
+        self.preneur = self.cbx_preneur.currentText()
+        self.contrat = self.cbx_contrat.currentText()
+        self.bout = self.cbx_bout.currentText()
+        self.point = self.le_point.text()
+        self.tete = self.cbx_tete.currentText() if self.nb_joueurs > 4 else "none"
+        self.appele = self.cbx_appele.currentText() if self.nb_joueurs > 4 else "none"
+        self.poignee = self.cbx_poignee.currentText()
+        self.petit = self.cbx_petit.currentText()
+        self.pt_che = self.cbx_pt_chelem.currentText()
+        self.gd_che = self.cbx_gd_chelem.currentText()
+
     def activation_btn_valider(self, actif):
         """Active ou pas le bouton valider et affiche
         la répartition des points entre attaque et défense."""
         if actif:
             self.btn_valider.setEnabled(True)
-            resultat = self.calcul()
-            if self.appele in ["Chien", "Solo"]:
-                coef = 4
-                self.lbl_result_appele.setText("")
-            elif self.nb_joueurs == 3 or self.nb_joueurs > 4:
-                coef = 2
-                self.lbl_result_appele.setText(str(resultat))
-            else:
-                coef = 3
-                self.lbl_result_appele.setText(str(resultat))
-            self.lbl_result_preneur.setText(str(resultat * coef))
 
-            self.lbl_result_defense.setText(str(resultat * -1))
-            if resultat >= 0:
-                self.lbl_result_preneur.setStyleSheet("color: green")
-                self.lbl_result_appele.setStyleSheet("color: green")
-                self.lbl_result_defense.setStyleSheet("color: red")
-            else:
-                self.lbl_result_preneur.setStyleSheet("color: red")
-                self.lbl_result_appele.setStyleSheet("color: red")
-                self.lbl_result_defense.setStyleSheet("color: green")
+            resultat = self.calcul_resultat_donne()
+            self.affichage_valeur_repartition(resultat)
+            self.coloration_repartition(resultat)
         else:
             self.btn_valider.setEnabled(False)
+
             self.lbl_result_preneur.setText("")
             self.lbl_result_appele.setText("")
             self.lbl_result_defense.setText("")
 
-    def calcul(self):
+    def calcul_resultat_donne(self):
         """Retourne les points de la donne en cours."""
         return calcul_donne(self.contrat, self.bout, self.point,
                             self.poignee, self.petit, self.pt_che, self.gd_che)
+
+    def affichage_valeur_repartition(self, resultat):
+        if self.appele in ["Chien", "Solo"]:
+            coef = 4
+            self.lbl_result_appele.setText("")
+        elif self.nb_joueurs == 3 or self.nb_joueurs > 4:
+            coef = 2
+            self.lbl_result_appele.setText(str(resultat))
+        else:
+            coef = 3
+            self.lbl_result_appele.setText(str(resultat))
+        self.lbl_result_preneur.setText(str(resultat * coef))
+        self.lbl_result_defense.setText(str(resultat * -1))
+
+    def coloration_repartition(self, resultat):
+        if resultat >= 0:
+            self.lbl_result_preneur.setStyleSheet("color: green")
+            self.lbl_result_appele.setStyleSheet("color: green")
+            self.lbl_result_defense.setStyleSheet("color: red")
+        else:
+            self.lbl_result_preneur.setStyleSheet("color: red")
+            self.lbl_result_appele.setStyleSheet("color: red")
+            self.lbl_result_defense.setStyleSheet("color: green")
 
     def maj_preneur_appele(self):
         """Met à jour les combobox preneur et appele entre elles :
@@ -422,7 +430,7 @@ class DetailsWindow(QWidget):
             self.cbx_appele.setCurrentIndex(-1)
         self.traitement = False
 
-        self.verif_complet()
+        self.check_complete()
 
     def fill_cbx_preneur_appele(self, list_p, list_a):
         """Affiche dans les comboxbox preneur et appele la liste des joueurs

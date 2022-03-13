@@ -16,7 +16,7 @@ from api.utils import EN_TETE_3_4, EN_TETE_5, EN_TETE_6, COLOR_GRAPH
 
 class LabelScore(QLabel):
 
-    nb_label = 0
+    nombre_label = 0
 
     def __init__(self, text, role):
         super().__init__(text)
@@ -28,8 +28,8 @@ class LabelScore(QLabel):
         if role == "form":
             self.setAlignment(Qt.AlignRight)
         elif role == "label":
-            self.setStyleSheet(f"color: {COLOR_GRAPH[self.nb_label]};")
-            LabelScore.nb_label += 1
+            self.setStyleSheet(f"color: {COLOR_GRAPH[self.nombre_label]};")
+            LabelScore.nombre_label += 1
 
 
 # noinspection PyAttributeOutsideInit
@@ -49,7 +49,7 @@ class TableWindow(QWidget):
         self.score_cumul = dict(self.score)
 
         self.setWindowTitle("Session en cours")
-        LabelScore.nb_label = 0
+        LabelScore.nombre_label = 0
         self.setup_ui()
 
     def setup_ui(self):
@@ -261,7 +261,7 @@ class TableWindow(QWidget):
 
     def affichage_score(self):
         """Met à jour les labels score de chaque joueur puis les déplacent
-        dans le grid layout pour les mettre en ordre décroissant"""
+        dans le grid layout pour les mettre en selection_order décroissant"""
         for i, liste in enumerate(self.score_cumul.values()):
             self.lbl_score[i].setText(str(liste[-1]))
 
