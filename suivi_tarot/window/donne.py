@@ -4,7 +4,8 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushBu
 from PySide6.QtCore import Qt, QSize, Signal
 
 from api.utils import TETE
-from api.calcul import calcul_donne, point_preneur_float
+from api.calcul import calcul_donne, point_preneur_float, Contrat, Poignee, \
+    calcul_repartition_point_entre_joueur
 
 
 # noinspection PyAttributeOutsideInit
@@ -18,7 +19,7 @@ class DetailsWindow(QWidget):
         super().__init__()
 
         self.joueurs = joueurs
-        self.nb_joueurs = len(joueurs)
+        self.nombre_joueurs = len(joueurs)
         self.ligne_donne = ligne
         self.pnj = pnj
         self.modif = list(modif)
@@ -83,7 +84,7 @@ class DetailsWindow(QWidget):
         self.cbx_preneur.setCurrentIndex(-1)
         self.lbl_contrat.setAlignment(Qt.AlignCenter)
         self.lbl_contrat.setText("Contrat")
-        self.cbx_contrat.addItems(["G", "GS", "GC"])
+        self.cbx_contrat.addItems([contrat.name for contrat in Contrat])
         self.cbx_contrat.setCurrentIndex(-1)
         self.lbl_bout.setAlignment(Qt.AlignCenter)
         self.lbl_bout.setText("Bout")
@@ -105,7 +106,7 @@ class DetailsWindow(QWidget):
         self.le_point.setValidator(pointValidator)
         self.btn_attaque_def.setMaximumSize(QSize(40, 16777215))
         self.btn_attaque_def.setText("Att")
-        if self.nb_joueurs > 4:
+        if self.nombre_joueurs > 4:
             self.lbl_tete.setAlignment(Qt.AlignCenter)
             self.lbl_tete.setText("Tête")
             self.cbx_tete.addItems(TETE)
@@ -122,7 +123,8 @@ class DetailsWindow(QWidget):
 
         self.lbl_poignee.setAlignment(Qt.AlignCenter)
         self.lbl_poignee.setText("Poignée")
-        self.cbx_poignee.addItems(["", "Simple", "Double", "Triple"])
+        self.cbx_poignee.addItems([""])
+        self.cbx_poignee.addItems([poignee.name for poignee in Poignee])
         self.cbx_poignee.setCurrentIndex(-1)
         self.lbl_petit.setAlignment(Qt.AlignCenter)
         self.lbl_petit.setText("Petit au bout")
@@ -227,7 +229,7 @@ class DetailsWindow(QWidget):
         self.resultat_preneur_layout.addWidget(self.lbl_point_preneur)
         self.resultat_preneur_layout.addWidget(self.lbl_result_preneur)
         self.resultat_layout.addLayout(self.resultat_preneur_layout)
-        if self.nb_joueurs > 4:
+        if self.nombre_joueurs > 4:
             self.resultat_appele_layout.addWidget(self.lbl_point_appele)
             self.resultat_appele_layout.addWidget(self.lbl_result_appele)
             self.resultat_layout.addLayout(self.resultat_appele_layout)
@@ -270,7 +272,7 @@ class DetailsWindow(QWidget):
         self.cbx_contrat.setCurrentText(self.modif[1])
         self.cbx_bout.setCurrentText(self.modif[2])
         self.le_point.setText(self.modif[3])
-        if self.nb_joueurs > 4:
+        if self.nombre_joueurs > 4:
             self.cbx_tete.setCurrentText(self.modif[4])
             self.cbx_appele.setCurrentText(self.modif[5])
             self.cbx_petit.setCurrentText(self.modif[6])
@@ -288,32 +290,32 @@ class DetailsWindow(QWidget):
         if self.pnj:
             param_donne = [self.pnj,
                            self.preneur,
-                           self.contrat,
+                           self.cbx_contrat.currentText(),
                            self.bout,
                            self.point,
                            self.tete,
                            self.appele,
-                           self.poignee,
+                           self.cbx_poignee.currentText(),
                            self.petit,
                            self.pt_che,
                            self.gd_che]
-        elif self.nb_joueurs == 5:
+        elif self.nombre_joueurs == 5:
             param_donne = [self.preneur,
-                           self.contrat,
+                           self.cbx_contrat.currentText(),
                            self.bout,
                            self.point,
                            self.tete,
                            self.appele,
-                           self.poignee,
+                           self.cbx_poignee.currentText(),
                            self.petit,
                            self.pt_che,
                            self.gd_che]
         else:
             param_donne = [self.preneur,
-                           self.contrat,
+                           self.cbx_contrat.currentText(),
                            self.bout,
                            self.point,
-                           self.poignee,
+                           self.cbx_poignee.currentText(),
                            self.petit,
                            self.pt_che,
                            self.gd_che]
@@ -353,51 +355,60 @@ class DetailsWindow(QWidget):
 
     def get_values_from_text_fields(self):
         self.preneur = self.cbx_preneur.currentText()
-        self.contrat = self.cbx_contrat.currentText()
+        self.contrat = self.conversion_contrat(self.cbx_contrat.currentText())
         self.bout = self.cbx_bout.currentText()
         self.point = self.le_point.text()
-        self.tete = self.cbx_tete.currentText() if self.nb_joueurs > 4 else "none"
-        self.appele = self.cbx_appele.currentText() if self.nb_joueurs > 4 else "none"
-        self.poignee = self.cbx_poignee.currentText()
+        self.tete = self.cbx_tete.currentText() if self.nombre_joueurs > 4 else "none"
+        self.appele = self.cbx_appele.currentText() if self.nombre_joueurs > 4 else "none"
+        self.poignee = self.conversion_poignee(self.cbx_poignee.currentText())
         self.petit = self.cbx_petit.currentText()
         self.pt_che = self.cbx_pt_chelem.currentText()
         self.gd_che = self.cbx_gd_chelem.currentText()
 
-    def activation_btn_valider(self, actif):
+    @staticmethod
+    def conversion_contrat(choix_contrat: str) -> Contrat:
+        """Retourne l'élément de la classe Contrat correspondant au choix
+        de la combobox contrat"""
+        for contrat in Contrat:
+            if choix_contrat == contrat.name:
+                return contrat
+
+    @staticmethod
+    def conversion_poignee(choix_poignee: str) -> Poignee | None:
+        """Retourne l'élément de la classe Poignee correspondant au choix
+        de la combobox poignee"""
+        for poignee in Poignee:
+            if choix_poignee == poignee.name:
+                return poignee
+
+    def activation_btn_valider(self, actif: bool):
         """Active ou pas le bouton valider et affiche
         la répartition des points entre attaque et défense."""
+        self.btn_valider.setEnabled(actif)
         if actif:
-            self.btn_valider.setEnabled(True)
-
             resultat = self.calcul_resultat_donne()
             self.affichage_valeur_repartition(resultat)
             self.coloration_repartition(resultat)
         else:
-            self.btn_valider.setEnabled(False)
-
             self.lbl_result_preneur.setText("")
             self.lbl_result_appele.setText("")
             self.lbl_result_defense.setText("")
 
-    def calcul_resultat_donne(self):
+    def calcul_resultat_donne(self) -> int:
         """Retourne les points de la donne en cours."""
         return calcul_donne(self.contrat, self.bout, self.point,
                             self.poignee, self.petit, self.pt_che, self.gd_che)
 
-    def affichage_valeur_repartition(self, resultat):
-        if self.appele in ["Chien", "Solo"]:
-            coef = 4
-            self.lbl_result_appele.setText("")
-        elif self.nb_joueurs == 3 or self.nb_joueurs > 4:
-            coef = 2
-            self.lbl_result_appele.setText(str(resultat))
-        else:
-            coef = 3
-            self.lbl_result_appele.setText(str(resultat))
-        self.lbl_result_preneur.setText(str(resultat * coef))
-        self.lbl_result_defense.setText(str(resultat * -1))
+    def affichage_valeur_repartition(self, resultat: int):
+        preneur, appele, defense = calcul_repartition_point_entre_joueur(resultat,
+                                                                         self.appele,
+                                                                         self.nombre_joueurs)
 
-    def coloration_repartition(self, resultat):
+        self.lbl_result_preneur.setText(str(preneur))
+        self.lbl_result_appele.setText(str(appele))
+        self.lbl_result_defense.setText(str(defense))
+
+    def coloration_repartition(self, resultat: int):
         if resultat >= 0:
             self.lbl_result_preneur.setStyleSheet("color: green")
             self.lbl_result_appele.setStyleSheet("color: green")
@@ -432,15 +443,15 @@ class DetailsWindow(QWidget):
 
         self.check_complete()
 
-    def fill_cbx_preneur_appele(self, list_p, list_a):
+    def fill_cbx_preneur_appele(self, list_preneur: list[str], list_appele: list[str]):
         """Affiche dans les comboxbox preneur et appele la liste des joueurs
         disponibles pour chacun."""
         self.traitement = True
         self.cbx_preneur.clear()
-        self.cbx_preneur.addItems(list_p)
-        if self.nb_joueurs > 4:
+        self.cbx_preneur.addItems(list_preneur)
+        if self.nombre_joueurs > 4:
             self.cbx_appele.clear()
-            self.cbx_appele.addItems(list_a)
+            self.cbx_appele.addItems(list_appele)
             self.cbx_appele.addItems(["Chien", "Solo"])
         self.traitement = False
 

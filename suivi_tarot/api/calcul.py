@@ -2,7 +2,7 @@ from math import ceil, floor
 from enum import Enum
 
 
-class CoefContrat(Enum):
+class Contrat(Enum):
     """Enumération des contrats possibles associés à leur coefficient"""
     G = 2   # Garde
     GS = 4  # Garde Sans
@@ -15,7 +15,7 @@ class Poignee(Enum):
     Triple = 40  # 13, 10 ou 8
 
 
-def calcul_donne(contrat: str, bout: str, point: float, poignee: str,
+def calcul_donne(contrat: Contrat, bout: str, point: float, poignee: Poignee | str,
                  petit_au_bout: str, petit_chelem: str, grand_chelem: str):
     """Retourne le résultat d'une donne."""
     coef = valeur_coefficient(contrat)
@@ -34,11 +34,11 @@ def calcul_donne(contrat: str, bout: str, point: float, poignee: str,
 
     return resultat * signe
 
-def valeur_coefficient(contrat: str) -> int:
-    """Retourne la valeur du coefficient multiplicateur qui est fonction du contrat
+def valeur_coefficient(contrat: Contrat) -> int:
+    """Retourne la valeur du coefficient associé au contrat
     choisi par le preneur avant de commencer une donne."""
-    for coef_contrat in CoefContrat:
-        if contrat == coef_contrat.name:
+    for coef_contrat in Contrat:
+        if contrat == coef_contrat:
             return coef_contrat.value
 
 def valeur_cible(bout: str) -> int:
@@ -67,14 +67,14 @@ def base_resultat(cible: int, point: int, coef: int) -> int:
     """Retourne la valeur brute de la donne."""
     return (abs(cible - point) + 25) * coef
 
-def ajout_poignee(annonce: str) -> int:
+def ajout_poignee(annonce: Poignee) -> int:
     """Retourne le bonus correspondant à une poignée."""
     for poignee in Poignee:
-        if annonce == poignee.name:
+        if annonce == poignee:
             return poignee.value
 
 def ajout_petit_au_bout(annonce: str, coef: int, signe: int) -> int:
-    """Retourne le bonus/malus d'un petit au bout"""
+    """Retourne le bonus/malus d'un petit joué au dernier pli de la donne"""
     return 10 * coef * signe if annonce == "Gagné" else -10 * coef * signe
 
 def ajout_petit_chelem(signe: int) -> int:
@@ -84,11 +84,28 @@ def ajout_petit_chelem(signe: int) -> int:
 def ajout_grand_chelem(annonce: str, signe: int) -> int:
     """Retourne le bonus/malus pour la réalisation d'un grand chelem (tous les plis)."""
     valeur = {
-        "Réussi": -200,
+        "Réussi": 400,
         "Réussi ss annonce": 200,
-        "Raté": 400
+        "Raté": -200
     }
     return valeur[annonce] * signe
 
 def point_preneur_float(point: str, preneur: bool) -> float:
     return float(point) if preneur else 91 - float(point)
+
+def calcul_repartition_point_entre_joueur(resultat: int,
+                                          appele: str,
+                                          nombre_joueur: int
+                                          ) -> tuple[int, int | str, int]:
+    if appele in {"Chien", "Solo"}:
+        coef = 4
+        appele = ''
+    elif nombre_joueur == 3 or nombre_joueur > 4:
+        coef = 2
+        appele = resultat
+    else:
+        coef = 3
+        appele = ''
+    preneur = resultat * coef
+    defense = resultat * -1
+    return preneur, appele, defense

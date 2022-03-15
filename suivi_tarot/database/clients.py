@@ -24,6 +24,7 @@ def init_bdd():
     db.close()
 
 def ajout_session(**session):
+    """Insère les données d'une session ainsi que les donnes associées"""
     db = sqlite3.connect(DATA_FILE)
     c = db.cursor()
 
@@ -48,8 +49,8 @@ def ajout_session(**session):
         if session.get(f"d{donne}").get("pnj", ""):
             insert_donne_joueur(c, id_donne, "pnj", session[f"d{donne}"]["pnj"])
 
-        for joueur in session[f"d{donne}"]["defense"]:
-            insert_donne_joueur(c, id_donne, "defense", joueur)
+        for i, joueur in enumerate(session[f"d{donne}"]["defense"], 1):
+            insert_donne_joueur_defense(c, id_donne, joueur, i)
 
     db.commit()
     db.close()
@@ -63,8 +64,14 @@ def get_id_joueur(cursor, pseudo):
     return cursor.execute(f"SELECT id FROM joueur WHERE pseudo='{pseudo}'").fetchone()[0]
 
 def insert_donne_joueur(cursor, id_donne, table, pseudo):
+    """Insère les données dans une des tables de jointures donne-joueur"""
     id_joueur = get_id_joueur(cursor, pseudo)
     cursor.execute(f"INSERT INTO {table} (donne, joueur) VALUES ({id_donne}, {id_joueur})")
+
+def insert_donne_joueur_defense(cursor, id_donne, pseudo, numero):
+    """Insère les données dans la table de jointure defense"""
+    id_joueur = get_id_joueur(cursor, pseudo)
+    cursor.execute(f"INSERT INTO defense (donne, joueur, numero) VALUES ({id_donne}, {id_joueur}, {numero})")
 
 def get_joueur_actif():
     """Retourne la liste des joueurs actifs"""
