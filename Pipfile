@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 pyside6 = "*"
 matplotlib = "*"
+sqlalchemy = "*"
 
 [dev-packages]
 pytest = "*"
