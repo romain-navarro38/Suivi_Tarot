@@ -5,7 +5,7 @@ from PySide6.QtCore import Qt, QSize, Signal
 
 from api.utils import TETE
 from api.calcul import calcul_donne, point_preneur_float, Contrat, Poignee, \
-    calcul_repartition_point_entre_joueur
+    calcul_repartition_point_entre_joueur, conversion_contrat, conversion_poignee
 
 
 # noinspection PyAttributeOutsideInit
@@ -355,31 +355,15 @@ class DetailsWindow(QWidget):
 
     def get_values_from_text_fields(self):
         self.preneur = self.cbx_preneur.currentText()
-        self.contrat = self.conversion_contrat(self.cbx_contrat.currentText())
+        self.contrat = conversion_contrat(self.cbx_contrat.currentText())
         self.bout = self.cbx_bout.currentText()
         self.point = self.le_point.text()
         self.tete = self.cbx_tete.currentText() if self.nombre_joueurs > 4 else "none"
         self.appele = self.cbx_appele.currentText() if self.nombre_joueurs > 4 else "none"
-        self.poignee = self.conversion_poignee(self.cbx_poignee.currentText())
+        self.poignee = conversion_poignee(self.cbx_poignee.currentText())
         self.petit = self.cbx_petit.currentText()
         self.pt_che = self.cbx_pt_chelem.currentText()
         self.gd_che = self.cbx_gd_chelem.currentText()
-
-    @staticmethod
-    def conversion_contrat(choix_contrat: str) -> Contrat:
-        """Retourne l'élément de la classe Contrat correspondant au choix
-        de la combobox contrat"""
-        for contrat in Contrat:
-            if choix_contrat == contrat.name:
-                return contrat
-
-    @staticmethod
-    def conversion_poignee(choix_poignee: str) -> Poignee | None:
-        """Retourne l'élément de la classe Poignee correspondant au choix
-        de la combobox poignee"""
-        for poignee in Poignee:
-            if choix_poignee == poignee.name:
-                return poignee
 
     def activation_btn_valider(self, actif: bool):
         """Active ou pas le bouton valider et affiche
@@ -458,10 +442,11 @@ class DetailsWindow(QWidget):
 
 if __name__ == '__main__':
     from PySide6.QtWidgets import QApplication
+    from api.utils import JOUEURS
 
     app = QApplication()
     window = DetailsWindow(
-        joueurs=["Romain", "Ludo", "Emeline", "Eddy", "Aurore"],
+        joueurs=JOUEURS,
         ligne=0,
         modif=(),
         pnj=""

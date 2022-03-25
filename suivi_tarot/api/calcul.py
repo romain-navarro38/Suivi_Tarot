@@ -15,6 +15,18 @@ class Poignee(Enum):
     Triple = 40  # 13, 10 ou 8
 
 
+def conversion_contrat(choix_contrat: str) -> Contrat:
+    """Retourne l'élément de la classe Contrat correspondant à la valeur textuelle"""
+    for contrat in Contrat:
+        if choix_contrat == contrat.name:
+            return contrat
+
+def conversion_poignee(choix_poignee: str) -> Poignee | None:
+    """Retourne l'élément de la classe Poignee correspondant à la valeur textuelle"""
+    for poignee in Poignee:
+        if choix_poignee == poignee.name:
+            return poignee
+
 def calcul_donne(contrat: Contrat, bout: str, point: float, poignee: Poignee | str,
                  petit_au_bout: str, petit_chelem: str, grand_chelem: str):
     """Retourne le résultat d'une donne."""

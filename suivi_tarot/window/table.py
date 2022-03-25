@@ -1,13 +1,16 @@
-import datetime as dt
+from datetime import datetime
 from random import choice
 from functools import partial
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QCloseEvent
 from PySide6.QtWidgets import QWidget, QTableWidget, QVBoxLayout, QHeaderView, QPushButton, QLabel, QHBoxLayout, \
-    QSizePolicy, QGridLayout, QSpacerItem
+    QSizePolicy, QGridLayout, QSpacerItem, QMessageBox
 
-from database.clients import ajout_session
+from api.calcul import conversion_contrat, conversion_poignee
+from database.clients import insert_new_partie, insert_joueurs_partie, insert_donne, insert_preneur, insert_appele, \
+    insert_pnj, insert_defense
+from database.models import Donne
 from window.graph_session import GraphSession
 from window.pnj import PnjWindow
 from window.donne import DetailsWindow
@@ -15,7 +18,6 @@ from api.utils import EN_TETE_3_4, EN_TETE_5, EN_TETE_6, COLOR_GRAPH
 
 
 class LabelScore(QLabel):
-
     nombre_label = 0
 
     def __init__(self, text, role):
@@ -34,7 +36,7 @@ class LabelScore(QLabel):
 
 # noinspection PyAttributeOutsideInit
 class TableWindow(QWidget):
-    """Fenêtre représentant une session où les donnes associées sont
+    """Fenêtre représentant une partie où les donnes associées sont
     représentées par une ligne d'un QTableWidget"""
 
     refresh_graph = Signal(dict, int)
@@ -47,6 +49,7 @@ class TableWindow(QWidget):
         self.nombre_joueurs = len(joueurs)
         self.score = {k: [0] for k in joueurs}
         self.score_cumul = dict(self.score)
+        self.saved = False
 
         self.setWindowTitle("Session en cours")
         LabelScore.nombre_label = 0
@@ -107,7 +110,15 @@ class TableWindow(QWidget):
     def setup_connections(self):
         self.tab_donne.cellDoubleClicked.connect(self.dispatch_action)
         self.btn_ajout_ligne.clicked.connect(partial(self.dispatch_action, "ajout"))
-        self.btn_valid_session.clicked.connect(self.valid_session)
+        self.btn_valid_session.clicked.connect(self.valid_partie)
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        """Si la partie n'est sauvegardée, demande à l'utilisateur de confirmer l'abandon"""
+        if not self.saved:
+            msg = "La partie n'a pas été enregistré !\nEtes-vous sur de vouloir quitter ?"
+            choix = self.popup_validation(QMessageBox.Warning, msg, QMessageBox.No)
+            if choix == QMessageBox.No:
+                event.ignore()
 
     def new_ligne(self, row):
         """Insére une nouvelle ligne dans QTableWidget"""
@@ -160,11 +171,11 @@ class TableWindow(QWidget):
             - Fenêtre donne en mode ajout (conditions : btn_ajout_donne ou double clic dernière ligne)
             - Fenêtre donne en mode modif (condition : double clic sur une ligne renseignée)"""
         if (
-            self.nombre_joueurs > 5
-            and self.tab_donne.rowCount() == 1
-            and row == 0
-            and column == 0
-            and self.tab_donne.cellWidget(0, 1).text() == ""
+                self.nombre_joueurs > 5
+                and self.tab_donne.rowCount() == 1
+                and row == 0
+                and column == 0
+                and self.tab_donne.cellWidget(0, 1).text() == ""
         ):
             self.new_pnj = PnjWindow(self.pnj)
             self.new_pnj.select_joueur.connect(self.remplace_pnj)
@@ -248,7 +259,8 @@ class TableWindow(QWidget):
 
     @staticmethod
     def cumuler_score(score: dict) -> dict:
-        """Retourne un dictionnaire"""
+        """Retourne un dictionnaire où la clé est un joueur et
+        la valeur une liste de ses scores cumulés au fur et à mesure des donnes"""
         cumul_dict = {}
         for joueur, valeurs in score.items():
             cumul = 0
@@ -275,36 +287,105 @@ class TableWindow(QWidget):
             self.score_layout.addWidget(classement[i][0], i, 0)
             self.score_layout.addWidget(classement[i][2], i, 1)
 
-    def valid_session(self):
-        """Enregistre en bdd la session et donnes associées"""
+    def valid_partie(self):
+        """Enregistre en bdd la partie et donnes associées"""
         if self.tab_donne.rowCount() <= 2:
             return
-        session = {"date_": dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
-                   "table_": self.nombre_joueurs if self.nombre_joueurs < 6 else 5,
-                   "joueurs": self.joueurs,
-                   "nb_donne": self.tab_donne.rowCount() - 1}
 
+        choix = self.popup_validation(QMessageBox.Question, "Terminer la partie ?", QMessageBox.Yes)
+        if choix == QMessageBox.Yes:
+            partie_id = self.save_partie()
+            self.save_joueurs(partie_id)
+            for row in range(self.tab_donne.rowCount() - 1):
+                donne_id = self.save_donne(partie_id, row)
+                self.save_preneur(donne_id)
+                self.save_appele(donne_id)
+                self.save_pnj(donne_id)
+                self.save_defense(donne_id)
+            self.saved = True
+            self.close()
+
+    def save_partie(self) -> int:
+        """Enregistre la partie, soit la date et le type de jeu (à 3, 4 ou 5 joueurs).
+        Retourne l'id de la partie ainsi enregistrée"""
+        partie = {"date_": datetime.now(),
+                  "table_": self.nombre_joueurs if self.nombre_joueurs < 6 else 5}
+        return insert_new_partie(**partie)
+
+    def save_joueurs(self, partie_id: int):
+        """Enregistre les joueurs participants"""
+        insert_joueurs_partie(partie_id, self.joueurs)
+
+    def save_donne(self, partie_id: int, row: int) -> int:
+        """Enregistre une donne de la partie et retourne son id généré"""
         column = ["preneur", "contrat", "nb_bout", "point", "poignee", "petit", "pt_chelem", "gd_chelem"]
         if self.nombre_joueurs > 4:
             column.insert(4, "tete")
             column.insert(5, "appele")
 
-        for i, row in enumerate(list(range(self.tab_donne.rowCount() - 1))):
-            liste = list(self.get_valeur_donne(row))
-            dict_donne = dict(zip(column, liste))
-            if self.nombre_joueurs < 5:
-                dict_donne["tete"] = ""
-            if self.nombre_joueurs == 6:
-                dict_donne["pnj"] = self.tab_donne.cellWidget(row, 0).text()
-            session[f"d{i}"] = dict_donne
+        liste = list(self.get_valeur_donne(row))
+        self.dict_donne = dict(zip(column, liste))
+        if self.nombre_joueurs < 5:
+            self.dict_donne["tete"] = None
+            self.dict_donne["appele"] = None
+        if self.nombre_joueurs == 6:
+            self.dict_donne["pnj"] = self.tab_donne.cellWidget(row, 0).text()
+        else:
+            self.dict_donne["pnj"] = None
+        donne = Donne(partie_id=partie_id,
+                      nb_bout=int(self.dict_donne["nb_bout"]),
+                      contrat=conversion_contrat(self.dict_donne["contrat"]),
+                      tete=self.dict_donne["tete"],
+                      point=float(self.dict_donne["point"]),
+                      petit=self.dict_donne["petit"],
+                      poignee=conversion_poignee(self.dict_donne["poignee"]),
+                      pt_chelem=self.dict_donne["pt_chelem"],
+                      gd_chelem=self.dict_donne["gd_chelem"])
+        return insert_donne(donne)
 
-            defense = list(self.joueurs)
-            for joueur in self.joueurs:
-                if joueur in (session.get(f"d{i}").get("preneur", ""),
-                              session.get(f"d{i}").get("appele", ""),
-                              session.get(f"d{i}").get("pnj", "")):
-                    defense.remove(joueur)
-            session[f"d{i}"]["defense"] = defense
+    def save_preneur(self, donne_id: int):
+        """Enregistre le preneur d'une donne"""
+        insert_preneur(donne_id, self.dict_donne["preneur"])
 
-        ajout_session(**session)
-        self.close()
+    def save_appele(self, donne_id: int):
+        """Enregistre l'appelé d'une donne (partie à 5 ou 6 joueurs)"""
+        if self.dict_donne["appele"]:
+            insert_appele(donne_id, self.dict_donne["appele"])
+
+    def save_pnj(self, donne_id: int):
+        """Enregistre le joueur n'ayant pas joué la donne (partie à 6 joueurs)"""
+        if self.dict_donne["pnj"]:
+            insert_pnj(donne_id, self.dict_donne["pnj"])
+
+    def save_defense(self, donne_id: int):
+        """Enregistre les joueurs ayant joué en défense une donne"""
+        defense = list(self.joueurs)
+        for joueur in self.joueurs:
+            if joueur in (self.dict_donne.get("preneur", ""),
+                          self.dict_donne.get("appele", ""),
+                          self.dict_donne.get("pnj", "")):
+                defense.remove(joueur)
+
+        for numero, joueur in enumerate(defense, 1):
+            insert_defense(donne_id, joueur, numero)
+
+    @staticmethod
+    def popup_validation(icon: QMessageBox.Icon, text: str, defaut_btn: QMessageBox.StandardButton):
+        """Demande une confirmation oui non à l'utilisateur via un pop-up"""
+        msg = QMessageBox()
+        msg.setWindowTitle("Confirmation")
+        msg.setIcon(icon)
+        msg.setText(text)
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg.setDefaultButton(defaut_btn)
+        msg.show()
+        return msg.exec()
+
+
+if __name__ == "__main__":
+    from PySide6.QtWidgets import QApplication
+
+    app = QApplication()
+    window = TableWindow(["Romain", "Ludovic", "Emeline", "Eddy", "Aurore"])
+    window.show()
+    app.exec()
