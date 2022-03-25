@@ -1,6 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QListWidget, QAbstractItemView, \
-    QListWidgetItem
+from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QListWidget, QAbstractItemView
 
 from database.clients import get_joueur_actif
 from window.table import TableWindow
@@ -34,8 +33,7 @@ class SelectJoueurWindow(QWidget):
 
     def modify_widgets(self):
         self.btn_valider.setEnabled(False)
-        liste_joueur = [QListWidgetItem(j[0]).text() for j in get_joueur_actif()]
-        self.lw_joueur.addItems(liste_joueur)
+        self.lw_joueur.addItems(get_joueur_actif())
         self.lw_joueur.setSelectionMode(QAbstractItemView.MultiSelection)
 
     def create_layouts(self):

@@ -5,7 +5,7 @@ from PySide6.QtGui import QIcon, QFont, QCloseEvent
 from PySide6.QtWidgets import QApplication, QWidget, QGridLayout, QLabel, QListWidget, QPushButton, QListWidgetItem, \
     QAbstractItemView
 
-from database.clients import get_joueur_actif, get_joueur_inactif, maj_status_joueurs
+from database.clients import get_joueur_actif, get_joueur_inactif, update_status_joueurs
 from window.ajout_joueur import AjoutJoueurWindow
 from api.utils import IMAGE_FOLDER
 
@@ -54,11 +54,11 @@ class GestionJoueurWindow(QWidget):
         self.btn_transfert.setIconSize(QSize(60, 40))
         self.btn_transfert.setFlat(True)
 
-        liste_joueur = [QListWidgetItem(j[0]).text() for j in get_joueur_inactif()]
-        self.lw_inactif.addItems(liste_joueur)
+        # liste_joueur = [QListWidgetItem(j[0]).text() for j in get_joueur_inactif()]
+        self.lw_inactif.addItems(get_joueur_inactif())
         self.lw_inactif.setSelectionMode(QAbstractItemView.MultiSelection)
-        liste_joueur = [QListWidgetItem(j[0]).text() for j in get_joueur_actif()]
-        self.lw_actif.addItems(liste_joueur)
+        # liste_joueur = [QListWidgetItem(j[0]).text() for j in get_joueur_actif()]
+        self.lw_actif.addItems(get_joueur_actif())
         self.lw_actif.setSelectionMode(QAbstractItemView.MultiSelection)
 
     def create_layouts(self):
@@ -114,11 +114,11 @@ class GestionJoueurWindow(QWidget):
         if lw == "inactif":
             lw_depart = self.lw_inactif
             lw_arrive = self.lw_actif
-            status = 1
+            status = True
         else:
             lw_depart = self.lw_actif
             lw_arrive = self.lw_inactif
-            status = 0
+            status = False
 
         row = lw_depart.row(item)
         self.modif[item.text()] = status
@@ -128,17 +128,17 @@ class GestionJoueurWindow(QWidget):
         """Bascule tous les items sélectionnés entre les deux listes"""
         for item in self.lw_inactif.selectedItems():
             row = self.lw_inactif.row(item)
-            self.modif[item.text()] = 1
+            self.modif[item.text()] = True
             self.lw_actif.addItem(self.lw_inactif.takeItem(row))
         for item in self.lw_actif.selectedItems():
             row = self.lw_actif.row(item)
-            self.modif[item.text()] = 0
+            self.modif[item.text()] = False
             self.lw_inactif.addItem(self.lw_actif.takeItem(row))
 
     def save_changement(self):
         """Sauvegarde en bdd l'attribut actif de chaque joueur"""
         if self.modif:
-            maj_status_joueurs(self.modif)
+            update_status_joueurs(self.modif)
             self.close()
 
 
