@@ -1,12 +1,12 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QListWidget, QAbstractItemView
 
-from database.clients import get_joueur_actif
+from database.clients import get_active_players
 from window.table import TableWindow
 
 
 # noinspection PyAttributeOutsideInit
-class SelectJoueurWindow(QWidget):
+class SelectPlayerWindow(QWidget):
     """Fenêtre de sélection des joueurs participants à la session"""
     def __init__(self):
         super().__init__()
@@ -26,67 +26,67 @@ class SelectJoueurWindow(QWidget):
 
     def create_widgets(self):
         self.lbl_liste = QLabel("Joueurs autour de la table :")
-        self.lw_joueur = QListWidget()
-        self.lbl_nb_joueur = QLabel("0 sélectionné")
-        self.btn_valider = QPushButton("Valider")
-        self.btn_annuler = QPushButton("Annuler")
+        self.lw_player = QListWidget()
+        self.lbl_number_players = QLabel("0 sélectionné")
+        self.btn_validate = QPushButton("Valider")
+        self.btn_cancel = QPushButton("Annuler")
 
     def modify_widgets(self):
-        self.btn_valider.setEnabled(False)
-        self.lw_joueur.addItems(get_joueur_actif())
-        self.lw_joueur.setSelectionMode(QAbstractItemView.MultiSelection)
+        self.btn_validate.setEnabled(False)
+        self.lw_player.addItems(get_active_players())
+        self.lw_player.setSelectionMode(QAbstractItemView.MultiSelection)
 
     def create_layouts(self):
         self.main_layout = QVBoxLayout(self)
-        self.bouton_layout = QHBoxLayout()
+        self.button_layout = QHBoxLayout()
 
     def add_widgets_to_layouts(self):
         self.main_layout.addWidget(self.lbl_liste)
-        self.main_layout.addWidget(self.lw_joueur)
-        self.main_layout.addWidget(self.lbl_nb_joueur)
-        self.bouton_layout.addWidget(self.btn_valider)
-        self.bouton_layout.addWidget(self.btn_annuler)
-        self.main_layout.addLayout(self.bouton_layout)
+        self.main_layout.addWidget(self.lw_player)
+        self.main_layout.addWidget(self.lbl_number_players)
+        self.button_layout.addWidget(self.btn_validate)
+        self.button_layout.addWidget(self.btn_cancel)
+        self.main_layout.addLayout(self.button_layout)
 
     def setup_connections(self):
-        self.lw_joueur.itemSelectionChanged.connect(self.selection_joueur)
-        self.btn_valider.clicked.connect(self.lancement_session)
-        self.btn_annuler.clicked.connect(self.close)
+        self.lw_player.itemSelectionChanged.connect(self.select_player)
+        self.btn_validate.clicked.connect(self.launch_partie)
+        self.btn_cancel.clicked.connect(self.close)
 
-    def selection_joueur(self):
+    def select_player(self):
         """Lance les actions après un changement de sélection dans le ListWidget"""
         self.order_of_selection()
-        self.maj_interface()
+        self.update_interface()
 
-    def maj_interface(self):
+    def update_interface(self):
         """Active ou non le bouton valider en fonction du nombre de joueurs sélectionnés
         et affichage de ce dernier"""
-        nb_select = len(self.selected_players)
+        number_select = len(self.selected_players)
 
-        self.btn_valider.setEnabled(2 < nb_select < 7)
-        self.lbl_nb_joueur.setText(f"{nb_select} sélectionné{'s' if nb_select > 1 else ''}")
+        self.btn_validate.setEnabled(2 < number_select < 7)
+        self.lbl_number_players.setText(f"{number_select} sélectionné{'s' if number_select > 1 else ''}")
 
     def order_of_selection(self):
         """Sauvegarde de l'ordre dans lequel les pseudos sont sélectionnés"""
-        new_selected_players = {elem.text() for elem in self.lw_joueur.selectedItems()}
+        new_selected_players = {elem.text() for elem in self.lw_player.selectedItems()}
         if new_selected_players - self.selected_players:
-            pseudo = (new_selected_players - self.selected_players).pop()
-            self.selected_players.add(pseudo)
-            self.selection_order[pseudo] = len(self.selected_players)
+            nickname = (new_selected_players - self.selected_players).pop()
+            self.selected_players.add(nickname)
+            self.selection_order[nickname] = len(self.selected_players)
         else:
-            pseudo = (self.selected_players - new_selected_players).pop()
-            self.selected_players.remove(pseudo)
-            rang = self.selection_order[pseudo]
-            del self.selection_order[pseudo]
+            nickname = (self.selected_players - new_selected_players).pop()
+            self.selected_players.remove(nickname)
+            rang = self.selection_order[nickname]
+            del self.selection_order[nickname]
             for cle in self.selection_order:
                 if self.selection_order[cle] > rang:
                     self.selection_order[cle] -= 1
 
-    def lancement_session(self):
+    def launch_partie(self):
         """Ouvre la fenêtre d'enregistrement d'une session"""
-        joueur_table = self.create_list_player_sorted()
+        player_table = self.create_list_player_sorted()
 
-        self.table = TableWindow(joueur_table)
+        self.table = TableWindow(player_table)
         self.table.setWindowModality(Qt.ApplicationModal)
         self.close()
         self.table.show()
@@ -96,10 +96,10 @@ class SelectJoueurWindow(QWidget):
         list_sorted = []
         i = 1
         while self.selection_order:
-            for pseudo, rang in self.selection_order.items():
-                if self.selection_order[pseudo] == i:
-                    list_sorted.append(pseudo)
-                    del self.selection_order[pseudo]
+            for nickname, rang in self.selection_order.items():
+                if self.selection_order[nickname] == i:
+                    list_sorted.append(nickname)
+                    del self.selection_order[nickname]
                     break
             i += 1
 
@@ -111,6 +111,6 @@ if __name__ == '__main__':
 
 
     app = QApplication()
-    window = SelectJoueurWindow()
+    window = SelectPlayerWindow()
     window.show()
     app.exec()

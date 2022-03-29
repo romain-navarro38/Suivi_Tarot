@@ -7,12 +7,12 @@ class PnjWindow(QWidget):
     """Fenêtre permettant de changer le pnj tiré au hasard pour la première
     donne d'une session de 6 joueurs"""
 
-    select_joueur = Signal(str)
+    select_player = Signal(str)
 
-    def __init__(self, joueurs):
+    def __init__(self, players):
         super().__init__()
 
-        self.joueurs = joueurs
+        self.players = players
         self.setup_ui()
 
     def setup_ui(self):
@@ -23,18 +23,18 @@ class PnjWindow(QWidget):
         self.setup_connections()
 
     def create_widgets(self):
-        self.lbl_choix = QLabel("Choix du PNJ :")
+        self.lbl_choice = QLabel("Choix du PNJ :")
         self.lw_pnj = QListWidget()
         self.btn_select = QPushButton("Sélectionner")
 
     def modify_widgets(self):
-        self.lw_pnj.addItems(self.joueurs)
+        self.lw_pnj.addItems(self.players)
 
     def create_layouts(self):
         self.main_layout = QVBoxLayout(self)
 
     def add_widgets_to_layouts(self):
-        self.main_layout.addWidget(self.lbl_choix)
+        self.main_layout.addWidget(self.lbl_choice)
         self.main_layout.addWidget(self.lw_pnj)
         self.main_layout.addWidget(self.btn_select)
 
@@ -45,5 +45,5 @@ class PnjWindow(QWidget):
     def selection_pnj(self):
         """Emet vers la fenêtre parente le pseudo du pnj sélectionné"""
         if self.lw_pnj.selectedItems():
-            self.select_joueur.emit(self.lw_pnj.currentItem().text())
+            self.select_player.emit(self.lw_pnj.currentItem().text())
             self.close()

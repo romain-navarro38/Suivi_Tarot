@@ -1,5 +1,5 @@
 """Point d'entrée du programme. Actions :
-- Lance la création d'une bdd s'il elle n'est trouvé
+- Lance la création d'une bdd s'il elle n'est pas trouvé
 - Affiche la fenêtre principale du programme"""
 
 import sys

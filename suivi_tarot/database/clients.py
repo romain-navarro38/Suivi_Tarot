@@ -9,8 +9,8 @@ def init_bdd():
     non jouables Chien et Solo utilent aux parties à 5 et 6 joueurs"""
     md.Base.metadata.create_all(md.engine)
 
-    insert_new_joueur({'pseudo': 'Chien', 'actif': False, 'protege': True})
-    insert_new_joueur({'pseudo': 'Solo', 'actif': False, 'protege': True})
+    insert_new_player({'nickname': 'Chien', 'active': False, 'protect': True})
+    insert_new_player({'nickname': 'Solo', 'active': False, 'protect': True})
 
 def insert_new_partie(**partie) -> int:
     """Insère les données d'une session ainsi que les donnes associées"""
@@ -19,13 +19,13 @@ def insert_new_partie(**partie) -> int:
     md.session.commit()
     return partie.id
 
-def insert_joueurs_partie(partie_id: int, joueurs: list[str]):
+def insert_players_partie(partie_id: int, players: list[str]):
     """Insère l'id des joueurs ayant participé à une partie dans la
     table de jointure partie_joueur"""
-    for joueur in joueurs:
-        joueur_id = get_id_joueur(joueur)
-        partie_joueur = md.PartieJoueur(partie_id=partie_id, joueur_id=joueur_id)
-        md.session.add(partie_joueur)
+    for player in players:
+        player_id = get_player_id(player)
+        partie_player = md.PartiePlayer(partie_id=partie_id, player_id=player_id)
+        md.session.add(partie_player)
     md.session.commit()
 
 def insert_donne(donne: md.Donne) -> int:
@@ -35,74 +35,74 @@ def insert_donne(donne: md.Donne) -> int:
     md.session.commit()
     return donne.id
 
-def insert_preneur(donne_id: int, pseudo: str):
+def insert_preneur(donne_id: int, nickname: str):
     """Enregistre en bdd l'id du joueur ayant participé à une donne
     comme preneur"""
-    joueur_id = get_id_joueur(pseudo)
-    md.session.add(md.Preneur(donne_id=donne_id, joueur_id=joueur_id))
+    joueur_id = get_player_id(nickname)
+    md.session.add(md.Preneur(donne_id=donne_id, player_id=joueur_id))
     md.session.commit()
 
-def insert_appele(donne_id: int, pseudo: str):
+def insert_appele(donne_id: int, nickname: str):
     """Enregistre en bdd l'id du joueur ayant participé à une donne
     comme appele (partie à 5 ou 6 joueurs uniquement)"""
-    joueur_id = get_id_joueur(pseudo)
-    md.session.add(md.Appele(donne_id=donne_id, joueur_id=joueur_id))
+    player_id = get_player_id(nickname)
+    md.session.add(md.Appele(donne_id=donne_id, player_id=player_id))
     md.session.commit()
 
-def insert_pnj(donne_id: int, pseudo: str):
+def insert_pnj(donne_id: int, nickname: str):
     """Enregistre en bdd l'id du joueur ayant participé à une donne
     comme pnj (partie à 6 joueurs uniquement)"""
-    joueur_id = get_id_joueur(pseudo)
-    md.session.add(md.Pnj(donne_id=donne_id, joueur_id=joueur_id))
+    player_id = get_player_id(nickname)
+    md.session.add(md.Pnj(donne_id=donne_id, player_id=player_id))
     md.session.commit()
 
-def insert_defense(donne_id: int, pseudo: str, numero: int):
+def insert_defense(donne_id: int, nickname: str, number: int):
     """Enregistre en bdd l'id du joueur ayant participé à une donne
     comme defenseur"""
-    joueur_id = get_id_joueur(pseudo)
-    md.session.add(md.Defense(donne_id=donne_id, joueur_id=joueur_id, numero=numero))
+    player_id = get_player_id(nickname)
+    md.session.add(md.Defense(donne_id=donne_id, player_id=player_id, numero=number))
     md.session.commit()
 
-def get_id_joueur(pseudo: str) -> int:
+def get_player_id(nickname: str) -> int:
     """Retourne l'id d'un joueur en fonction de son pseudo"""
-    stmt = select(md.Joueur.id).where(md.Joueur.pseudo == pseudo)
-    id_joueur = md.session.execute(stmt).first()
-    return id_joueur[0]
+    statement = select(md.Player.id).where(md.Player.nickname == nickname)
+    player_id = md.session.execute(statement).first()
+    return player_id[0]
 
-def insert_new_joueur(joueur: dict):
+def insert_new_player(player: dict):
     """Insertion en bdd d'un joueur. Dictionnaire du type :
     {'pseudo': str, 'nom': str|None, 'prenom': str|None, 'actif': bool, 'protege': bool}"""
-    md.session.add(md.Joueur(**joueur))
+    md.session.add(md.Player(**player))
     md.session.commit()
 
-def get_joueur_actif() -> list[str]:
+def get_all_players() -> list[str]:
     """Retourne la liste de tous les joueurs"""
-    stmt = select(md.Joueur.pseudo).where(md.Joueur.actif == True)
-    joueurs = md.session.execute(stmt)
-    return joueurs.scalars().all()
+    players = md.session.execute(select(md.Player.nickname))
+    return players.scalars().all()
 
-def get_all_joueur() -> list[str]:
+def get_active_players() -> list[str]:
     """Retourne la liste des joueurs actifs"""
-    joueurs = md.session.execute(select(md.Joueur.pseudo))
-    return joueurs.scalars().all()
+    statement = select(md.Player.nickname).where(md.Player.active == True)
+    players = md.session.execute(statement)
+    return players.scalars().all()
 
-def get_joueur_inactif() -> list[str]:
+def get_inactive_players() -> list[str]:
     """Retourne la liste des joueurs inactifs"""
-    stmt = select(md.Joueur.pseudo).where(
+    statement = select(md.Player.nickname).where(
                         and_(
-                            md.Joueur.actif == False,
-                            md.Joueur.protege == False
+                            md.Player.active == False,
+                            md.Player.protect == False
                         ))
-    joueurs = md.session.execute(stmt)
-    return joueurs.scalars().all()
+    players = md.session.execute(statement)
+    return players.scalars().all()
 
-def update_status_joueurs(joueur_status: dict):
+def update_status_joueurs(status_player: dict):
     """Met à jour le champ actif d'un ou plusieurs joueurs
     à partir d'un dictionnaire du type {"pseudo": bool}"""
-    for pseudo, status in joueur_status.items():
-        stmt = update(md.Joueur).where(md.Joueur.pseudo == pseudo).values(actif=status).\
+    for nickname, status in status_player.items():
+        statement = update(md.Player).where(md.Player.nickname == nickname).values(active=status).\
             execution_options(synchronize_session='fetch')
-        md.session.execute(stmt)
+        md.session.execute(statement)
     md.session.commit()
 
 

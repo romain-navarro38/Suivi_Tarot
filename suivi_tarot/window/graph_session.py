@@ -43,8 +43,8 @@ class GraphSession(QWidget):
     def plot(self, data, point):
         self.ax.clear()
         self.ax.set_xticks(list(range(point)))
-        for i, (joueur, score) in enumerate(data.items()):
-            self.ax.plot(score, label=joueur, color=COLOR_GRAPH[i])
+        for i, (player, score) in enumerate(data.items()):
+            self.ax.plot(score, label=player, color=COLOR_GRAPH[i])
         # self.ax.legend()
         self.ax.grid(axis="y")
         self.canvas.draw()
