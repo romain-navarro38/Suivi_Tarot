@@ -3,8 +3,8 @@
 from sqlalchemy import create_engine, Integer, Column, String, Boolean, ForeignKey, DateTime, Enum, Float
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
-from api.calcul import Contract, Poignee
-from api.utils import DATA_FILE
+from suivi_tarot.api.calcul import Contract, Poignee
+from suivi_tarot.api.utils import DATA_FILE
 
 
 engine = create_engine(f'sqlite:///{DATA_FILE}', echo=True)

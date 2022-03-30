@@ -6,9 +6,9 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 
-from window.main_window import MainWindow
-from api.utils import DATA_FILE
-from database.clients import init_bdd
+from suivi_tarot.window.main_window import MainWindow
+from suivi_tarot.api.utils import DATA_FILE
+from suivi_tarot.database.clients import init_bdd
 
 
 if __name__ == '__main__':

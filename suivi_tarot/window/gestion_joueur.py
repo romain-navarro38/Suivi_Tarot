@@ -5,9 +5,9 @@ from PySide6.QtGui import QIcon, QFont, QCloseEvent
 from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QListWidget, QPushButton, QListWidgetItem, \
     QAbstractItemView
 
-from database.clients import get_active_players, get_inactive_players, update_status_joueurs
-from window.ajout_joueur import AddPlayerWindow
-from api.utils import IMAGE_FOLDER
+from suivi_tarot.database.clients import get_active_players, get_inactive_players, update_status_joueurs
+from suivi_tarot.window.ajout_joueur import AddPlayerWindow
+from suivi_tarot.api.utils import IMAGE_FOLDER
 
 
 # noinspection PyAttributeOutsideInit

@@ -3,8 +3,8 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushBu
     QSizePolicy, QSpacerItem
 from PySide6.QtCore import Qt, QSize, Signal
 
-from api.utils import TETE
-from api.calcul import calcul_donne, point_preneur_float, Contract, Poignee, \
+from suivi_tarot.api.utils import TETE
+from suivi_tarot.api.calcul import calcul_donne, point_preneur_float, Contract, Poignee, \
     calculation_distribution_point_between_player, conversion_contract, conversion_poignee
 
 
@@ -441,7 +441,7 @@ class DetailsWindow(QWidget):
 
 if __name__ == '__main__':
     from PySide6.QtWidgets import QApplication
-    from api.utils import PLAYERS
+    from suivi_tarot.api.utils import PLAYERS
 
     app = QApplication()
     window = DetailsWindow(players=PLAYERS, ligne=0, modif=(), pnj="")

@@ -4,6 +4,8 @@ CUR_FILE = Path(__file__)
 DATA_FOLDER = CUR_FILE.parent.parent.parent
 DATA_FILE = DATA_FOLDER / "db.sqlite3"
 IMAGE_FOLDER = CUR_FILE.parent.parent / "ressource" / "image"
+print(CUR_FILE)
+print(IMAGE_FOLDER)
 
 HEADER_3_4 = ["Preneur",
               "Contrat",

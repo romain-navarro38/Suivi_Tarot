@@ -7,14 +7,14 @@ from PySide6.QtGui import QFont, QCloseEvent
 from PySide6.QtWidgets import QWidget, QTableWidget, QVBoxLayout, QHeaderView, QPushButton, QLabel, QHBoxLayout, \
     QSizePolicy, QGridLayout, QSpacerItem, QMessageBox
 
-from api.calcul import conversion_contract, conversion_poignee
-from database.clients import insert_new_partie, insert_players_partie, insert_donne, insert_preneur, insert_appele, \
-    insert_pnj, insert_defense
-from database.models import Donne
-from window.graph_session import GraphSession
-from window.pnj import PnjWindow
-from window.donne import DetailsWindow
-from api.utils import HEADER_3_4, HEADER_5, HEADER_6, COLOR_GRAPH
+from suivi_tarot.api.calcul import conversion_contract, conversion_poignee
+from suivi_tarot.database.clients import insert_new_partie, insert_players_partie, insert_donne, insert_preneur, \
+    insert_appele, insert_pnj, insert_defense
+from suivi_tarot.database.models import Donne
+from suivi_tarot.window.graph_session import GraphSession
+from suivi_tarot.window.pnj import PnjWindow
+from suivi_tarot.window.donne import DetailsWindow
+from suivi_tarot.api.utils import HEADER_3_4, HEADER_5, HEADER_6, COLOR_GRAPH
 
 
 class LabelScore(QLabel):
@@ -52,7 +52,6 @@ class TableWindow(QWidget):
         self.saved = False
 
         self.setWindowTitle("Partie en cours")
-        LabelScore.nombre_label = 0
         self.setup_ui()
 
     def setup_ui(self):
@@ -338,8 +337,8 @@ class TableWindow(QWidget):
                       point=float(self.dict_donne["point"]),
                       petit=self.dict_donne["petit"],
                       poignee=conversion_poignee(self.dict_donne["poignee"]),
-                      petit_chelem=self.dict_donne["pt_chelem"],
-                      grand_chelem=self.dict_donne["gd_chelem"])
+                      petit_chelem=self.dict_donne["petit_chelem"],
+                      grand_chelem=self.dict_donne["grand_chelem"])
         return insert_donne(donne)
 
     def save_preneur(self, donne_id: int):
@@ -383,7 +382,7 @@ class TableWindow(QWidget):
 
 if __name__ == "__main__":
     from PySide6.QtWidgets import QApplication
-    from api.utils import PLAYERS
+    from suivi_tarot.api.utils import PLAYERS
 
     app = QApplication()
     window = TableWindow(PLAYERS)

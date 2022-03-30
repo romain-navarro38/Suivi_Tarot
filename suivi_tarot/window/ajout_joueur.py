@@ -3,8 +3,8 @@ from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import QWidget, QLabel, QLineEdit, QCheckBox, QPushButton, QFormLayout, \
     QVBoxLayout, QHBoxLayout
 
-from database.clients import insert_new_player
-from api.verification import player_is_valid
+from suivi_tarot.database.clients import insert_new_player
+from suivi_tarot.api.verification import player_is_valid
 
 
 # noinspection PyAttributeOutsideInit

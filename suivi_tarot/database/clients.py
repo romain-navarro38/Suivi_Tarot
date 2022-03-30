@@ -1,7 +1,7 @@
 from sqlalchemy import select, update, and_
 
-import database.models as md
-from api.utils import DATA_FILE
+import suivi_tarot.database.models as md
+from suivi_tarot.api.utils import DATA_FILE
 
 
 def init_bdd():
@@ -60,7 +60,7 @@ def insert_defense(donne_id: int, nickname: str, number: int):
     """Enregistre en bdd l'id du joueur ayant participé à une donne
     comme defenseur"""
     player_id = get_player_id(nickname)
-    md.session.add(md.Defense(donne_id=donne_id, player_id=player_id, numero=number))
+    md.session.add(md.Defense(donne_id=donne_id, player_id=player_id, number=number))
     md.session.commit()
 
 def get_player_id(nickname: str) -> int:

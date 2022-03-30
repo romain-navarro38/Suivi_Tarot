@@ -1,8 +1,8 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QListWidget, QAbstractItemView
 
-from database.clients import get_active_players
-from window.table import TableWindow
+from suivi_tarot.database.clients import get_active_players
+from suivi_tarot.window.table import TableWindow
 
 
 # noinspection PyAttributeOutsideInit

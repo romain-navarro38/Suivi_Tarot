@@ -1,6 +1,6 @@
 from enum import Enum, auto
 
-from database.clients import get_all_players
+from suivi_tarot.database.clients import get_all_players
 
 
 class Comparison(Enum):

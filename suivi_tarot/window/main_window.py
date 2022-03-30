@@ -1,8 +1,9 @@
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtWidgets import QWidget, QGroupBox, QPushButton, QHBoxLayout, QVBoxLayout
 
-from window.select_joueur import SelectPlayerWindow
-from window.gestion_joueur import ManagementPlayerWindow
+from suivi_tarot.window.select_joueur import SelectPlayerWindow
+from suivi_tarot.window.gestion_joueur import ManagementPlayerWindow
+from suivi_tarot.window.table import LabelScore
 
 
 class CustomButton(QPushButton):
@@ -62,6 +63,7 @@ class MainWindow(QWidget):
         self.btn_player.clicked.connect(self.management_player)
 
     def new_partie(self):
+        LabelScore.number_label = 0
         self.partie = SelectPlayerWindow()
         self.partie.setWindowModality(Qt.ApplicationModal)
         self.partie.show()
