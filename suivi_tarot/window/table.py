@@ -1,5 +1,4 @@
 from datetime import datetime
-import random
 from functools import partial
 
 from PySide6.QtCore import Qt, Signal
@@ -14,7 +13,7 @@ from suivi_tarot.database.models import Donne
 from suivi_tarot.window.graph_session import GraphSession
 from suivi_tarot.window.pnj import PnjWindow
 from suivi_tarot.window.donne import DetailsWindow
-from suivi_tarot.api.utils import HEADER_3_4, HEADER_5, HEADER_6, COLOR_GRAPH
+from suivi_tarot.api.utils import HEADER_3_4, HEADER_5, HEADER_6, COLOR_GRAPH, get_random_item_with_constraint
 
 
 class LabelScore(QLabel):
@@ -133,8 +132,10 @@ class TableWindow(QWidget):
     def draw_pnj(self, row):
         """Pour les sessions à 6 joueurs : tirage au sort d'un joueur qui devient
         pnj (personne non-joueur) de la donne"""
-        pnj = self.pnj.pop(self.pnj.index(random.choice(self.pnj)))
-        self.tab_donne.cellWidget(row, 0).setText(pnj)
+        previous_pnj = self.tab_donne.cellWidget(row - 1, 0).text() if row else ""
+        new_pnj = get_random_item_with_constraint(self.pnj, previous_pnj)
+        self.tab_donne.cellWidget(row, 0).setText(new_pnj)
+        self.pnj.remove(new_pnj)
         if len(self.pnj) == 0:
             self.pnj = list(self.players)
 
