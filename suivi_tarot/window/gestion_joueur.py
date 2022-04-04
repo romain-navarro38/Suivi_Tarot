@@ -139,7 +139,7 @@ class ManagementPlayerWindow(QWidget):
         """Sauvegarde en bdd l'attribut actif de chaque joueur"""
         if self.modif:
             update_status_joueurs(self.modif)
-            self.close()
+        self.close()
 
 
 if __name__ == '__main__':
