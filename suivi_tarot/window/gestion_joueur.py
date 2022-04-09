@@ -54,10 +54,8 @@ class ManagementPlayerWindow(QWidget):
         self.btn_transfert.setIconSize(QSize(60, 40))
         self.btn_transfert.setFlat(True)
 
-        # liste_joueur = [QListWidgetItem(j[0]).text() for j in get_joueur_inactif()]
         self.lw_inactive.addItems(get_inactive_players())
         self.lw_inactive.setSelectionMode(QAbstractItemView.MultiSelection)
-        # liste_joueur = [QListWidgetItem(j[0]).text() for j in get_joueur_actif()]
         self.lw_active.addItems(get_active_players())
         self.lw_active.setSelectionMode(QAbstractItemView.MultiSelection)
 
