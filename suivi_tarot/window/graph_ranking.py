@@ -6,7 +6,7 @@ from suivi_tarot.api.utils import COLOR_GRAPH
 
 
 # noinspection PyAttributeOutsideInit
-class GraphSession(QWidget):
+class GraphWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -40,11 +40,14 @@ class GraphSession(QWidget):
     def setup_connections(self):
         self.graph = self.parent.refresh_graph.connect(self.plot)
 
-    def plot(self, data, point):
+    def plot(self, data, point, window):
         self.ax.clear()
         self.ax.set_xticks(list(range(point)))
         for i, (player, score) in enumerate(data.items()):
-            self.ax.plot(score, label=player, color=COLOR_GRAPH[i])
+            if window == "table":
+                self.ax.plot(score, label=player, color=COLOR_GRAPH[i])
+            else:
+                self.ax.plot(score, label=player)
         # self.ax.legend()
         self.ax.grid(axis="y")
         self.canvas.draw()
