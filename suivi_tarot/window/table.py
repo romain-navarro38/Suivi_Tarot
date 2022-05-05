@@ -10,7 +10,7 @@ from suivi_tarot.api.calcul import conversion_contract, conversion_poignee
 from suivi_tarot.database.clients import insert_new_partie, insert_players_partie, insert_donne, insert_preneur, \
     insert_appele, insert_pnj, insert_defense
 from suivi_tarot.database.models import Donne
-from suivi_tarot.window.graph_session import GraphSession
+from suivi_tarot.window.graph_ranking import GraphWidget
 from suivi_tarot.window.pnj import PnjWindow
 from suivi_tarot.window.donne import DetailsWindow
 from suivi_tarot.api.utils import HEADER_3_4, HEADER_5, HEADER_6, COLOR_GRAPH, get_random_item_with_constraint
@@ -38,7 +38,7 @@ class TableWindow(QWidget):
     """Fenêtre représentant une partie où les donnes associées sont
     représentées par une ligne d'un QTableWidget"""
 
-    refresh_graph = Signal(dict, int)
+    refresh_graph = Signal(dict, int, str)
 
     def __init__(self, players):
         super().__init__()
@@ -64,7 +64,7 @@ class TableWindow(QWidget):
         self.tab_donne = QTableWidget(self)
         self.btn_add_row = QPushButton("Nouvelle donne")
         self.btn_valid_partie = QPushButton("Valider partie")
-        self.graph = GraphSession(self)
+        self.graph = GraphWidget(self)
         self.graph.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
         self.lbl_player = [LabelScore(f"{player} :", "label") for player in self.players]
         self.lbl_score = [LabelScore("0", "form") for _ in range(self.number_players)]
@@ -157,7 +157,8 @@ class TableWindow(QWidget):
         self.score_cumul = self.accumulate_score(self.score)
         self.refresh_graph.emit(
             self.score_cumul,
-            self.tab_donne.rowCount() + 1)
+            self.tab_donne.rowCount() + 1,
+            "table")
         self.display_score()
 
         if row == self.tab_donne.rowCount() - 1:
