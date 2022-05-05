@@ -76,6 +76,8 @@ class Ranking:
             self.cumul[player] = self.donne[player]
 
     def cumulative_points_per_game(self):
+        """Création d'un DataFrame représentant le cumul des scores de chaque joueur
+        par partie"""
         self.cumul['id_partie'] = self.donne['id_partie']
         self.cumul.reset_index(inplace=True, drop=True)
         self.cumul = self.cumul.groupby('id_partie').sum()
@@ -84,6 +86,7 @@ class Ranking:
 
     @property
     def number_of_game(self) -> int:
+        """Nombre de parties trouvées"""
         return self.ranking.shape[0]
 
 
