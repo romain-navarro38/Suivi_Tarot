@@ -11,6 +11,7 @@ class Contract(Enum):
 
 class Poignee(Enum):
     """Enumération des annonces de poignée possibles associés à leur valeur"""
+    No = 0  # pas d'annonce
     Simple = 20  # nombre d'atouts : 18 à 3 joueurs, 15 à 4 joueurs ou 13 à 5 joueurs
     Double = 30  # 15, 13 ou 10
     Triple = 40  # 13, 10 ou 8
@@ -25,9 +26,7 @@ def conversion_contract(choix_contrat: str) -> Contract:
 
 def conversion_poignee(choix_poignee: str) -> Poignee | None:
     """Retourne l'élément de la classe Poignee correspondant à la valeur textuelle"""
-    for poignee in Poignee:
-        if choix_poignee == poignee.name:
-            return poignee
+    return next((poignee for poignee in Poignee if choix_poignee == poignee.name), Poignee.No)
 
 
 def calcul_donne(contract: Contract, bout: str, point: float, poignee: Poignee | str,
@@ -114,14 +113,17 @@ def add_grand_chelem(annonce: str, sign: int) -> int:
     return value[annonce] * sign
 
 
-def point_preneur_float(point: str, preneur: bool) -> float:
-    return float(point) if preneur else 91 - float(point)
+def point_preneur_float(point: str, is_attack: bool) -> float:
+    """Retourne les points de l'attaque convertis en float"""
+    return float(point) if is_attack else 91 - float(point)
 
 
-def calculation_distribution_point_between_player(result: int,
-                                                  appele: str,
-                                                  number_players: int
-                                                  ) -> tuple[int, int | str, int]:
+def distribution_point_between_attack_defense(result: int,
+                                              appele: str,
+                                              number_players: int
+                                              ) -> tuple[int, int | str, int]:
+    """Retourne les points les points à attribuer entre l'attaque et la défense
+    en fonction du résultat d'une donne"""
     if appele in {"Chien", "Solo"}:
         coef = 4
         appele = ''
@@ -134,3 +136,21 @@ def calculation_distribution_point_between_player(result: int,
     preneur = result * coef
     defense = result * -1
     return preneur, appele, defense
+
+
+def repartition_points_by_player(donne: dict, player: str) -> int:
+    """Retourne les points à attribuer un à joueur en fonction de son rôle
+    dans une donne"""
+    nickname = player
+
+    if nickname in [donne['pnj'], donne['preneur'], donne['appele']]:
+        if nickname == donne['pnj']:
+            return 0
+        elif nickname == donne['appele']:
+            return donne['result']
+        else:
+            return donne['result'] * 4 if donne['appele'] in ['Chien', 'Solo'] else donne['result'] * 2
+    elif nickname in [donne['defense1'], donne['defense2'], donne['defense3'], donne['defense4']]:
+        return donne['result'] * -1
+    else:
+        return 0
