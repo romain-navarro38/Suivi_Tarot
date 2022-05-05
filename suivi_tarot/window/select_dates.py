@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication, QWidget, QTabWidget, QVBoxLayout, QRadioButton, QComboBox, QHBoxLayout, \
     QLabel, QGridLayout, QDateTimeEdit, QPushButton
@@ -73,6 +73,9 @@ class CustomRadio(QRadioButton):
 class SelectDates(QWidget):
     """Fenêtre servant à la sélection d'une période. Emet sous forme de datetime
     le premier et le dernier jour de cette période."""
+
+    search_parameters = Signal(datetime, datetime, int)
+
     def __init__(self):
         super().__init__()
 
@@ -226,7 +229,10 @@ class SelectDates(QWidget):
             case 2:
                 self.free_date()
 
-        print(self.start_date, self.end_date, sep="\n")
+        self.search_parameters.emit(self.start_date,
+                                    self.end_date,
+                                    int(self.cbx_table_of.currentText()))
+        self.close()
 
     def year_date(self):
         """Détermine la date de début et de fin d'une année fixe ou sur les
