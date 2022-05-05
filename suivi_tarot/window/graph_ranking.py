@@ -7,6 +7,7 @@ from suivi_tarot.api.utils import COLOR_GRAPH
 
 # noinspection PyAttributeOutsideInit
 class GraphWidget(QWidget):
+    """Widget pour l'affichage graphique des classements"""
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -41,13 +42,19 @@ class GraphWidget(QWidget):
         self.graph = self.parent.refresh_graph.connect(self.plot)
 
     def plot(self, data, point, window):
+        """Génération des courbes"""
         self.ax.clear()
+        self.ax.set_xlim(0, point)
         self.ax.set_xticks(list(range(point)))
         for i, (player, score) in enumerate(data.items()):
             if window == "table":
                 self.ax.plot(score, label=player, color=COLOR_GRAPH[i])
-            else:
+            elif window == "ranking":
                 self.ax.plot(score, label=player)
+                self.ax.annotate(f'{player} ({score[-1]})',
+                                 xy=(point - 1, score[-1]),
+                                 xytext=(5, 0),
+                                 textcoords='offset points')
         # self.ax.legend()
         self.ax.grid(axis="y")
         self.canvas.draw()
