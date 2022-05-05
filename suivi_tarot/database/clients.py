@@ -1,6 +1,7 @@
 import datetime
 
-from sqlalchemy import select, update, and_, func
+import pandas as pd
+from sqlalchemy import select, update, and_, func, between
 
 import suivi_tarot.database.models as md
 from suivi_tarot.api.utils import DATA_FILE
@@ -16,11 +17,11 @@ def init_bdd():
 
 
 def insert_new_partie(**partie) -> int:
-    """Insère les données d'une session ainsi que les donnes associées"""
+    """Insère les données d'une partie ainsi que les donnes associées"""
     partie = md.Partie(**partie)
     md.session.add(partie)
     md.session.commit()
-    return partie.id
+    return partie.id_partie
 
 
 def insert_players_partie(partie_id: int, players: list[str]):
@@ -38,7 +39,7 @@ def insert_donne(donne: md.Donne) -> int:
     généré automatiquement"""
     md.session.add(donne)
     md.session.commit()
-    return donne.id
+    return donne.id_donne
 
 
 def insert_preneur(donne_id: int, nickname: str):
@@ -75,7 +76,7 @@ def insert_defense(donne_id: int, nickname: str, number: int):
 
 def get_player_id(nickname: str) -> int:
     """Retourne l'id d'un joueur en fonction de son pseudo"""
-    statement = select(md.Player.id).where(md.Player.nickname == nickname)
+    statement = select(md.Player.id_player).where(md.Player.nickname == nickname)
     player_id = md.session.execute(statement).first()
     return player_id[0]
 
@@ -138,7 +139,90 @@ def get_min_max_dates_parties() -> tuple[datetime.datetime | None, datetime.date
     return query[0][0], query[0][1]
 
 
+def get_donne(start_date: datetime, end_date: datetime, nombre_joueurs: int) -> pd.DataFrame:
+    """Retourne un DataFrame de toutes les parties et donnes jouées dans une période donnée
+    et pour un nombre de joueurs"""
+    query = select(md.Partie.id_partie,
+                   md.Partie.date_,
+                   md.Partie.table_,
+                   md.Donne.id_donne,
+                   md.Donne.contract,
+                   md.Donne.nb_bout,
+                   md.Donne.tete,
+                   md.Donne.point,
+                   md.Donne.petit,
+                   md.Donne.poignee,
+                   md.Donne.petit_chelem,
+                   md.Donne.grand_chelem) \
+        .join(md.Partie).where(and_(between(md.Partie.date_, start_date, end_date),
+                                    md.Partie.table_ == nombre_joueurs))
+    return pd.read_sql_query(sql=query, con=md.engine, index_col="id_donne")
+
+
+def get_preneur(start_date: datetime, end_date: datetime, nombre_joueurs: int) -> pd.DataFrame:
+    """Retourne un DataFrame de tous les joueurs ayant le rôle de preneur parmis les donnes jouées
+    dans une période donnée avec un certain nombre de joueurs"""
+    query = select(md.Donne.id_donne, md.Player.nickname).select_from(md.Player) \
+        .join(md.Preneur, md.Player.id_player == md.Preneur.player_id) \
+        .join(md.Donne, md.Preneur.donne_id == md.Donne.id_donne) \
+        .join(md.Partie, md.Donne.partie_id == md.Partie.id_partie) \
+        .where(and_(between(md.Partie.date_, start_date, end_date)),
+               md.Partie.table_ == nombre_joueurs)
+    return pd.read_sql_query(sql=query, con=md.engine, index_col="id_donne")
+
+
+def get_appele(start_date: datetime, end_date: datetime, nombre_joueurs: int) -> pd.DataFrame:
+    """Retourne un DataFrame de tous les joueurs ayant le rôle d'appelé parmis les donnes jouées
+    dans une période donnée avec un certain nombre de joueurs"""
+    query = select(md.Donne.id_donne, md.Player.nickname).select_from(md.Player) \
+        .join(md.Appele, md.Player.id_player == md.Appele.player_id) \
+        .join(md.Donne, md.Appele.donne_id == md.Donne.id_donne) \
+        .join(md.Partie, md.Donne.partie_id == md.Partie.id_partie) \
+        .where(and_(between(md.Partie.date_, start_date, end_date)),
+               md.Partie.table_ == nombre_joueurs)
+    return pd.read_sql_query(sql=query, con=md.engine, index_col="id_donne")
+
+
+def get_defense(start_date: datetime, end_date: datetime, nombre_joueurs: int, num: int) -> pd.DataFrame:
+    """Retourne un DataFrame de tous les joueurs ayant le rôle de défenseur parmis les donnes jouées
+    dans une période donnée avec un certain nombre de joueurs"""
+    query = select(md.Donne.id_donne, md.Player.nickname).select_from(md.Player) \
+        .join(md.Defense, md.Player.id_player == md.Defense.player_id) \
+        .join(md.Donne, md.Defense.donne_id == md.Donne.id_donne) \
+        .join(md.Partie, md.Donne.partie_id == md.Partie.id_partie) \
+        .where(and_(between(md.Partie.date_, start_date, end_date)),
+               md.Partie.table_ == nombre_joueurs,
+               md.Defense.number == num)
+    return pd.read_sql_query(sql=query, con=md.engine, index_col="id_donne")
+
+
+def get_pnj(start_date: datetime, end_date: datetime, nombre_joueurs: int) -> pd.DataFrame:
+    """Retourne un DataFrame de tous les joueurs ayant le rôle de pnj parmis les donnes jouées
+    dans une période donnée avec un certain nombre de joueurs"""
+    query = select(md.Donne.id_donne, md.Player.nickname).select_from(md.Player) \
+        .join(md.Pnj, md.Player.id_player == md.Pnj.player_id) \
+        .join(md.Donne, md.Pnj.donne_id == md.Donne.id_donne) \
+        .join(md.Partie, md.Donne.partie_id == md.Partie.id_partie) \
+        .where(and_(between(md.Partie.date_, start_date, end_date)),
+               md.Partie.table_ == nombre_joueurs)
+    return pd.read_sql_query(sql=query, con=md.engine, index_col="id_donne")
+
+
+def get_distinct_player(start_date: datetime, end_date: datetime, nombre_joueurs: int) -> list[str]:
+    """Retourne la liste de tous les joueurs ayant joué au moins une donne"""
+    query = select(md.Player.nickname).distinct().select_from(md.Player) \
+        .join(md.PartiePlayer, md.Player.id_player == md.PartiePlayer.player_id) \
+        .join(md.Partie, md.PartiePlayer.partie_id == md.Partie.id_partie) \
+        .where(and_(between(md.Partie.date_, start_date, end_date)),
+               md.Partie.table_ == nombre_joueurs)
+    return md.engine.execute(query).scalars().all()
+
+
 if __name__ == '__main__':
     if not DATA_FILE.exists():
         init_bdd()
-    print(get_min_max_dates_parties())
+    nb = 3
+    depart = datetime.datetime(2022, 1, 1)
+    fin = datetime.datetime(2022, 12, 31)
+    print(get_distinct_player(depart, fin, nb))
+
