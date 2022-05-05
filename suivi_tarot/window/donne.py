@@ -5,7 +5,7 @@ from PySide6.QtCore import Qt, QSize, Signal
 
 from suivi_tarot.api.utils import TETE
 from suivi_tarot.api.calcul import calcul_donne, point_preneur_float, Contract, Poignee, \
-    calculation_distribution_point_between_player, conversion_contract, conversion_poignee
+    distribution_point_between_attack_defense, conversion_contract, conversion_poignee
 
 
 # noinspection PyAttributeOutsideInit
@@ -124,7 +124,7 @@ class DetailsWindow(QWidget):
         self.lbl_poignee.setAlignment(Qt.AlignCenter)
         self.lbl_poignee.setText("Poignée")
         self.cbx_poignee.addItems([""])
-        self.cbx_poignee.addItems([poignee.name for poignee in Poignee])
+        self.cbx_poignee.addItems([poignee.name for poignee in Poignee if poignee.name != "No"])
         self.cbx_poignee.setCurrentIndex(-1)
         self.lbl_petit.setAlignment(Qt.AlignCenter)
         self.lbl_petit.setText("Petit au bout")
@@ -384,14 +384,18 @@ class DetailsWindow(QWidget):
                             self.poignee, self.petit, self.petit_chelem, self.grand_chelem)
 
     def displaying_distribution_value(self, result: int):
-        preneur, appele, defense = calculation_distribution_point_between_player(result, self.appele,
-                                                                                 self.number_players)
+        """Récupère et affiche les points de l'attaque et de la défense"""
+        preneur, appele, defense = distribution_point_between_attack_defense(result,
+                                                                             self.appele,
+                                                                             self.number_players)
 
         self.lbl_result_preneur.setText(str(preneur))
         self.lbl_result_appele.setText(str(appele))
         self.lbl_result_defense.setText(str(defense))
 
     def coloring_distribution(self, resultat: int):
+        """Affiche en vert les points positifs et en rouge les négatifs
+        pour les scores de l'attaque et de la défense"""
         if resultat >= 0:
             self.lbl_result_preneur.setStyleSheet("color: green")
             self.lbl_result_appele.setStyleSheet("color: green")
