@@ -3,7 +3,7 @@ from datetime import datetime
 import pandas as pd
 
 from suivi_tarot.database.clients import get_donne, get_preneur, get_appele, get_defense, get_pnj, get_distinct_player
-from suivi_tarot.api.calcul import calcul_donne, repartition
+from suivi_tarot.api.calcul import calcul_donne, repartition_points_by_player
 
 
 # noinspection PyAttributeOutsideInit
@@ -72,7 +72,7 @@ class Ranking:
         """Ajoute une colonne pour chaque joueur au DataFrame donne et calcul les points
         du joueur pour chaque donne"""
         for player in self.distinct_player:
-            self.donne[player] = self.donne.apply(repartition, axis=1, player=player)
+            self.donne[player] = self.donne.apply(repartition_points_by_player, axis=1, player=player)
             self.cumul[player] = self.donne[player]
 
     def cumulative_points_per_game(self):
