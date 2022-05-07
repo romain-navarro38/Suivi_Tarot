@@ -60,15 +60,15 @@ class MainWindow(QWidget):
         self.main_layout.addWidget(self.gb_gestion)
 
     def setup_connections(self):
-        self.btn_play.clicked.connect(self.new_partie)
+        self.btn_play.clicked.connect(self.new_game)
         self.btn_ranking.clicked.connect(self.display_ranking)
         self.btn_player.clicked.connect(self.management_player)
 
-    def new_partie(self):
+    def new_game(self):
         LabelScore.number_label = 0
-        self.partie = SelectPlayerWindow()
-        self.partie.setWindowModality(Qt.ApplicationModal)
-        self.partie.show()
+        self.game = SelectPlayerWindow()
+        self.game.setWindowModality(Qt.ApplicationModal)
+        self.game.show()
 
     def display_ranking(self):
         self.ranking = RankingWindow()

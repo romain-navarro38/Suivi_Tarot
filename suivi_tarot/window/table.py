@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QWidget, QTableWidget, QVBoxLayout, QHeaderView, Q
     QSizePolicy, QGridLayout, QSpacerItem, QMessageBox
 
 from suivi_tarot.api.calcul import conversion_contract, conversion_poignee
-from suivi_tarot.database.clients import insert_new_partie, insert_players_partie, insert_donne, insert_preneur, \
+from suivi_tarot.database.clients import insert_new_game, insert_players_game, insert_donne, insert_preneur, \
     insert_appele, insert_pnj, insert_defense
 from suivi_tarot.database.models import Donne
 from suivi_tarot.window.graph_ranking import GraphWidget
@@ -63,7 +63,7 @@ class TableWindow(QWidget):
     def create_widgets(self):
         self.tab_donne = QTableWidget(self)
         self.btn_add_row = QPushButton("Nouvelle donne")
-        self.btn_valid_partie = QPushButton("Valider partie")
+        self.btn_valid_game = QPushButton("Valider partie")
         self.graph = GraphWidget(self)
         self.graph.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
         self.lbl_player = [LabelScore(f"{player} :", "label") for player in self.players]
@@ -92,7 +92,7 @@ class TableWindow(QWidget):
     def add_widgets_to_layouts(self):
         self.main_layout.addWidget(self.tab_donne)
         self.button_layout.addWidget(self.btn_add_row)
-        self.button_layout.addWidget(self.btn_valid_partie)
+        self.button_layout.addWidget(self.btn_valid_game)
         self.main_layout.addLayout(self.button_layout)
 
         self.graph_score_layout.addWidget(self.graph)
@@ -108,7 +108,7 @@ class TableWindow(QWidget):
     def setup_connections(self):
         self.tab_donne.cellDoubleClicked.connect(self.dispatch_action)
         self.btn_add_row.clicked.connect(partial(self.dispatch_action, "add"))
-        self.btn_valid_partie.clicked.connect(self.valid_partie)
+        self.btn_valid_game.clicked.connect(self.valid_game)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """Si la partie n'est sauvegardée, demande à l'utilisateur de confirmer l'abandon"""
@@ -287,17 +287,17 @@ class TableWindow(QWidget):
             self.score_layout.addWidget(classement[i][0], i, 0)
             self.score_layout.addWidget(classement[i][2], i, 1)
 
-    def valid_partie(self):
+    def valid_game(self):
         """Enregistre en bdd la partie et donnes associées"""
         if self.tab_donne.rowCount() <= 2:
             return
 
         choice = self.popup_validation(QMessageBox.Question, "Terminer la partie ?", QMessageBox.Yes)
         if choice == QMessageBox.Yes:
-            partie_id = self.save_partie()
-            self.save_players(partie_id)
+            game_id = self.save_game()
+            self.save_players(game_id)
             for row in range(self.tab_donne.rowCount() - 1):
-                donne_id = self.save_donne(partie_id, row)
+                donne_id = self.save_donne(game_id, row)
                 self.save_preneur(donne_id)
                 self.save_appele(donne_id)
                 self.save_pnj(donne_id)
@@ -305,16 +305,16 @@ class TableWindow(QWidget):
             self.saved = True
             self.close()
 
-    def save_partie(self) -> int:
+    def save_game(self) -> int:
         """Enregistre la partie, soit la date et le type de jeu (à 3, 4 ou 5 joueurs).
         Retourne l'id de la partie ainsi enregistrée"""
         partie = {"date_": datetime.now(),
                   "table_": self.number_players if self.number_players < 6 else 5}
-        return insert_new_partie(**partie)
+        return insert_new_game(**partie)
 
     def save_players(self, partie_id: int):
         """Enregistre les joueurs participants"""
-        insert_players_partie(partie_id, self.players)
+        insert_players_game(partie_id, self.players)
 
     def save_donne(self, partie_id: int, row: int) -> int:
         """Enregistre une donne de la partie et retourne son id généré"""

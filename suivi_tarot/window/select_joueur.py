@@ -50,7 +50,7 @@ class SelectPlayerWindow(QWidget):
 
     def setup_connections(self):
         self.lw_player.itemSelectionChanged.connect(self.select_player)
-        self.btn_validate.clicked.connect(self.launch_partie)
+        self.btn_validate.clicked.connect(self.launch_game)
         self.btn_cancel.clicked.connect(self.close)
 
     def select_player(self):
@@ -82,7 +82,7 @@ class SelectPlayerWindow(QWidget):
                 if self.selection_order[cle] > rang:
                     self.selection_order[cle] -= 1
 
-    def launch_partie(self):
+    def launch_game(self):
         """Ouvre la fenêtre d'enregistrement d'une session"""
         player_table = self.create_list_player_sorted()
 
