@@ -25,7 +25,7 @@ class Player(Base):
     active = Column(Boolean, nullable=False)
     protect = Column(Boolean, nullable=False)
 
-    partie_player = relationship('PartiePlayer', back_populates='player')
+    game_player = relationship('GamePlayer', back_populates='player')
     preneur = relationship('Preneur', back_populates='player')
     appele = relationship('Appele', back_populates='player')
     defense = relationship('Defense', back_populates='player')
@@ -36,33 +36,31 @@ class Player(Base):
                f"actif: {self.actif}, protege: {self.protege})"
 
 
-# TODO:
-#   Replace Partie by Game
-class Partie(Base):
+class Game(Base):
     """Représente une partie avec sa date et le nombre de joueurs présents."""
-    __tablename__ = 'partie'
+    __tablename__ = 'game'
 
-    id_partie = Column(Integer, primary_key=True, autoincrement=True)
+    id_game = Column(Integer, primary_key=True, autoincrement=True)
     date_ = Column(DateTime, unique=True, nullable=False)
     table_ = Column(Integer, nullable=False)
 
-    partie_player = relationship('PartiePlayer', back_populates='partie')
-    donne = relationship('Donne', back_populates='partie')
+    game_player = relationship('GamePlayer', back_populates='game')
+    donne = relationship('Donne', back_populates='game')
 
     def __repr__(self):
-        return f"Partie(id: {self.id}, date: {self.date_}, table: {self.table_})"
+        return f"Game(id: {self.id}, date: {self.date_}, table: {self.table_})"
 
 
-class PartiePlayer(Base):
+class GamePlayer(Base):
     """Association d'une partie aux joueurs la disputant."""
-    __tablename__ = 'partie_player'
+    __tablename__ = 'game_player'
 
-    id_partie_player = Column(Integer, primary_key=True, autoincrement=True)
-    partie_id = Column(Integer, ForeignKey('partie.id_partie'), nullable=False)
+    id_game_player = Column(Integer, primary_key=True, autoincrement=True)
+    game_id = Column(Integer, ForeignKey('game.id_game'), nullable=False)
     player_id = Column(Integer, ForeignKey('player.id_player'), nullable=False)
 
-    partie = relationship('Partie', back_populates='partie_player')
-    player = relationship('Player', back_populates='partie_player')
+    game = relationship('Game', back_populates='game_player')
+    player = relationship('Player', back_populates='game_player')
 
 
 class Donne(Base):
@@ -70,7 +68,7 @@ class Donne(Base):
     __tablename__ = 'donne'
 
     id_donne = Column(Integer, primary_key=True, autoincrement=True)
-    partie_id = Column(Integer, ForeignKey('partie.id_partie'), nullable=False)
+    game_id = Column(Integer, ForeignKey('game.id_game'), nullable=False)
     nb_bout = Column(Integer, nullable=False)
     contract = Column(Enum(Contract), nullable=False)
     tete = Column(String)
@@ -80,7 +78,7 @@ class Donne(Base):
     petit_chelem = Column(String)
     grand_chelem = Column(String)
 
-    partie = relationship('Partie', back_populates='donne')
+    game = relationship('Game', back_populates='donne')
     preneur = relationship('Preneur', back_populates='donne')
     appele = relationship('Appele', back_populates='donne')
     defense = relationship('Defense', back_populates='donne')
