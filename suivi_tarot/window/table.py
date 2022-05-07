@@ -233,22 +233,18 @@ class TableWindow(QWidget):
         action = "add" if row == self.tab_donne.rowCount() - 1 else "replace"
         for player in self.players:
             if player not in [pnj, preneur, appele]:
-                liste = self.add_or_replacer_value_list(
-                    action, self.score[player], point[2], row + 1)
+                liste = self.add_or_replace_value_list(action, self.score[player], point[2], row + 1)
             elif player == pnj:
-                liste = self.add_or_replacer_value_list(
-                    action, self.score[player], "0", row + 1)
+                liste = self.add_or_replace_value_list(action, self.score[player], "0", row + 1)
             elif player == preneur:
-                liste = self.add_or_replacer_value_list(
-                    action, self.score[player], point[0], row + 1)
+                liste = self.add_or_replace_value_list(action, self.score[player], point[0], row + 1)
             else:
-                liste = self.add_or_replacer_value_list(
-                    action, self.score[player], point[1], row + 1)
+                liste = self.add_or_replace_value_list(action, self.score[player], point[1], row + 1)
 
             self.score[player] = liste
 
     @staticmethod
-    def add_or_replacer_value_list(choice: str, list_score: list[int], value: str, index_: int) -> list[int]:
+    def add_or_replace_value_list(choice: str, list_score: list[int], value: str, index_: int) -> list[int]:
         """Retourne une liste de score après lui avoir ajouté ou modifié une valeur"""
         value = int(value)
         if choice == "add":
