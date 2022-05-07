@@ -5,7 +5,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication, QWidget, QTabWidget, QVBoxLayout, QRadioButton, QComboBox, QHBoxLayout, \
     QLabel, QGridLayout, QDateTimeEdit, QPushButton
 
-from suivi_tarot.database.clients import get_distinct_years, get_min_max_dates_parties
+from suivi_tarot.database.clients import get_distinct_years, get_min_max_dates_games
 
 
 period_dict = {"type": ["Mois", "Trimestre", "Semestre"],
@@ -147,7 +147,7 @@ class SelectDates(QWidget):
         self.dte_from.setCalendarPopup(True)
         self.dte_to.setCalendarPopup(True)
 
-        min_date, max_date = get_min_max_dates_parties()
+        min_date, max_date = get_min_max_dates_games()
         if min_date:
             min_date = min_date.replace(hour=0, minute=0, second=0)
             max_date = max_date.replace(hour=23, minute=59, second=59)
