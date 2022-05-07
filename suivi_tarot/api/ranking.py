@@ -78,9 +78,9 @@ class Ranking:
     def cumulative_points_per_game(self):
         """Création d'un DataFrame représentant le cumul des scores de chaque joueur
         par partie"""
-        self.cumul['id_partie'] = self.donne['id_partie']
+        self.cumul['id_game'] = self.donne['id_game']
         self.cumul.reset_index(inplace=True, drop=True)
-        self.cumul = self.cumul.groupby('id_partie').sum()
+        self.cumul = self.cumul.groupby('id_game').sum()
         self.ranking: pd.DataFrame = self.cumul.cumsum()
         self.ranking.reset_index(inplace=True, drop=True)
 
