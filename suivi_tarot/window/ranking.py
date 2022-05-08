@@ -79,24 +79,28 @@ class RankingWindow(QWidget):
         self.btn_change_period.clicked.connect(self.other_search)
 
     def other_search(self):
+        """Ouvre la fenêtre de sélection de dates"""
         self.search = SelectDates()
         self.search.search_parameters.connect(self.update_display)
         self.search.show()
 
     def update_display(self, start: datetime, end: datetime, table_of: int):
+        """Lance les mises à jour d'affichage : graph, score et titre"""
         self.update_graph(start, end, table_of)
         clear_layout(self.score_layout)
         self.update_score()
         self.update_title(start, end, table_of)
 
     def update_graph(self, start: datetime, end: datetime, table_of: int):
+        """Charge le graphique"""
         self.rank = Ranking(start, end, table_of)
-        rank = self.rank.ranking.to_dict(orient="list")
+        rank: dict[list[str]] = self.rank.ranking.to_dict(orient="list")
         for liste in rank.values():
             liste.insert(0, 0)
         self.refresh_graph.emit(rank, self.rank.number_of_game + 1, "ranking")
 
     def update_score(self):
+        """Affiche les scores triés"""
         self.last_ranking = sorted(self.get_last_ranking(), key=lambda v: v[1], reverse=True)
         self.lbl_player = [LabelScore(f"{player[0]} :", "") for player in self.last_ranking]
         self.lbl_score = [LabelScore(f"{player[1]}", "form") for player in self.last_ranking]
@@ -105,18 +109,22 @@ class RankingWindow(QWidget):
             self.score_layout.addWidget(self.lbl_score[i], i, 1)
 
     def update_title(self, start: datetime, end: datetime, table_of: int):
+        """Mise à jour du titre"""
         start = start.strftime("%d/%m/%Y")
         end = end.strftime("%d/%m/%Y")
         self.title.setText(f"Du {start} au {end} - Table de {table_of} joueurs")
 
     def init_graph(self):
+        """Au démarrage de la fenêtre, lance le chargement des données
+        pour l'année en cours"""
         table_of = 5
         year = datetime.now().year
         start = datetime(year, 1, 1, 0, 0, 0)
         end = datetime(year, 12, 31, 23, 59, 59)
         self.update_display(start, end, table_of)
 
-    def get_last_ranking(self):
+    def get_last_ranking(self) -> list[tuple[str, int]]:
+        """Récupération du dernier score de chaque joueur"""
         return [(nickname, score.iloc[-1]) for (nickname, score) in self.rank.ranking.iteritems()]
 
 

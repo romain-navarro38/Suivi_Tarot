@@ -65,16 +65,20 @@ class MainWindow(QWidget):
         self.btn_player.clicked.connect(self.management_player)
 
     def new_game(self):
+        """Ouvre la fenêtre de sélection des joueurs pour l'enregistrement
+        d'une nouvelle partie"""
         LabelScore.number_label = 0
         self.game = SelectPlayerWindow()
         self.game.setWindowModality(Qt.ApplicationModal)
         self.game.show()
 
     def display_ranking(self):
+        """Ouvre la fenêtre de visualisation du classement général"""
         self.ranking = RankingWindow()
+        self.ranking.setWindowModality(Qt.ApplicationModal)
         self.ranking.show()
 
     def management_player(self):
+        """Ouvre la fenêtre de gestion des joueurs"""
         self.manage_player = ManagementPlayerWindow(self)
-        # self.gestion_j.setWindowModality(Qt.ApplicationModal)
         self.manage_player.show()
