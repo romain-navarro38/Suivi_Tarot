@@ -51,10 +51,6 @@ class GraphWidget(QWidget):
                 self.ax.plot(score, label=player, color=COLOR_GRAPH[i])
             elif window == "ranking":
                 self.ax.plot(score, label=player)
-                self.ax.annotate(f'{player} ({score[-1]})',
-                                 xy=(point - 1, score[-1]),
-                                 xytext=(5, 0),
-                                 textcoords='offset points')
-        # self.ax.legend()
+                self.ax.legend()
         self.ax.grid(axis="y")
         self.canvas.draw()
