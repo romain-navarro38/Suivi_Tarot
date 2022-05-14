@@ -21,7 +21,7 @@ def player_is_valid(new_player: str) -> bool:
 
 def check_availability_nickname(new_player: str) -> bool:
     """Vérifie si le pseudo est disponible dans la bdd
-    (non sensible à la casse"""
+    (non sensible à la casse)"""
     existing_players = get_all_players()
     return new_player.lower() not in [player.lower() for player in existing_players]
 
