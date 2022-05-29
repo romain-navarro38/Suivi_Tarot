@@ -1,5 +1,5 @@
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QWidget, QLabel, QListWidget, QPushButton, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QLabel, QListWidget, QPushButton, QVBoxLayout, QHBoxLayout
 
 
 # noinspection PyAttributeOutsideInit
@@ -26,21 +26,26 @@ class PnjWindow(QWidget):
         self.lbl_choice = QLabel("Choix du PNJ :")
         self.lw_pnj = QListWidget()
         self.btn_select = QPushButton("Sélectionner")
+        self.btn_cancel = QPushButton("Annuler")
 
     def modify_widgets(self):
         self.lw_pnj.addItems(self.players)
 
     def create_layouts(self):
         self.main_layout = QVBoxLayout(self)
+        self.btn_layout = QHBoxLayout()
 
     def add_widgets_to_layouts(self):
         self.main_layout.addWidget(self.lbl_choice)
         self.main_layout.addWidget(self.lw_pnj)
-        self.main_layout.addWidget(self.btn_select)
+        self.btn_layout.addWidget(self.btn_select)
+        self.btn_layout.addWidget(self.btn_cancel)
+        self.main_layout.addLayout(self.btn_layout)
 
     def setup_connections(self):
-        self.btn_select.clicked.connect(self.selection_pnj)
         self.lw_pnj.doubleClicked.connect(self.selection_pnj)
+        self.btn_select.clicked.connect(self.selection_pnj)
+        self.btn_cancel.clicked.connect(self.close)
 
     def selection_pnj(self):
         """Emet vers la fenêtre parente le pseudo du pnj sélectionné"""
