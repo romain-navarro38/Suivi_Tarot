@@ -4,16 +4,29 @@ import pandas as pd
 from sqlalchemy import select, update, and_, func, between
 
 import suivi_tarot.database.models as md
-from suivi_tarot.api.utils import DATA_FILE
+from suivi_tarot.api.utils import hashage_password, move_database
 
 
-def init_bdd():
-    """Création de la base de données et insertion des joueurs
-    non jouables Chien et Solo utilent aux parties à 5 et 6 joueurs"""
+def init_bdd(path: str, password: str):
+    """Création de la base de données, insertion des joueurs
+    non jouables Chien et Solo utilent aux parties à 5 et 6 joueurs
+    ainsi que le hash du mot de passe et son sel"""
     md.Base.metadata.create_all(md.engine)
 
     insert_new_player({'nickname': 'Chien', 'active': False, 'protect': True})
     insert_new_player({'nickname': 'Solo', 'active': False, 'protect': True})
+
+    hash_, salt = hashage_password(password)
+    insert_hash_password({"hash_": hash_, "salt": salt})
+
+    md.session.close()
+    move_database(path)
+
+
+def insert_hash_password(password):
+    """Insère le hash du mot de passe et le sel associé"""
+    md.session.add(md.Password(**password))
+    md.session.commit()
 
 
 def insert_new_game(**game) -> int:
@@ -218,10 +231,12 @@ def get_distinct_player(start_date: datetime, end_date: datetime, nombre_joueurs
     return md.engine.execute(query).scalars().all()
 
 
+def get_hash_and_salt() -> tuple[str, str]:
+    """Retourne le hash et sel stocké"""
+    query = md.session.query(md.Password.hash_, md.Password.salt).where(md.Password.id_password == 1).all()
+    return query[0][0], query[0][1]
+
+
 if __name__ == '__main__':
-    if not DATA_FILE.exists():
-        init_bdd()
-    nb = 3
-    depart = datetime.datetime(2022, 1, 1)
-    fin = datetime.datetime(2022, 12, 31)
-    print(get_distinct_player(depart, fin, nb))
+    pwd, salt = get_hash_and_salt()
+    print(pwd, salt)
