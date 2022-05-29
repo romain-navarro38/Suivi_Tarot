@@ -3,8 +3,9 @@ from functools import partial
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon, QFont, QCloseEvent
 from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QListWidget, QPushButton, QListWidgetItem, \
-    QAbstractItemView
+    QAbstractItemView, QInputDialog, QLineEdit
 
+from suivi_tarot.api.verification import check_password
 from suivi_tarot.database.clients import get_active_players, get_inactive_players, update_status_joueurs
 from suivi_tarot.window.ajout_joueur import AddPlayerWindow
 from suivi_tarot.api.utils import IMAGE_FOLDER
@@ -81,11 +82,13 @@ class ManagementPlayerWindow(QWidget):
         self.btn_cancel.clicked.connect(self.close)
 
     def add_player(self):
-        """Ouvre la fenêtre de création de nouveau joueur"""
-        self.new_player = AddPlayerWindow()
-        self.new_player.new_nickname.connect(self.add_nickname_to_lw)
-        self.new_player.window_status.connect(self.update_window_status)
-        self.new_player.show()
+        """Ouvre la fenêtre de création de nouveaux joueurs après vérification du mot de passe"""
+        password, ok = QInputDialog.getText(self, "Papier svp !", "Mot de passe administrateur :", QLineEdit.Password)
+        if ok and check_password(password):
+            self.new_player = AddPlayerWindow()
+            self.new_player.new_nickname.connect(self.add_nickname_to_lw)
+            self.new_player.window_status.connect(self.update_window_status)
+            self.new_player.show()
 
     def add_nickname_to_lw(self, player):
         """Ajoute un joueur à une des listes actif ou inactif après sa création."""
