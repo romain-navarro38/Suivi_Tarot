@@ -1,5 +1,6 @@
 """Représentation sous forme de classes via SQLAlchemy de la bdd"""
 
+
 from sqlalchemy import create_engine, Integer, Column, String, Boolean, ForeignKey, DateTime, Enum, Float
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
@@ -13,15 +14,16 @@ if CONFIG_FILE.exists():
     # Vérification de l'existance d'une bdd valide
     path, valid = get_path_database(".sqlite3")
     if valid:
-        engine = create_engine(f'sqlite:///{path}', echo=True)
-        Session = sessionmaker(bind=engine)
-        session = Session()
+        engine = create_engine(f'sqlite:///{path}', echo=False)
+    else:
+        # Sinon, tente une connexion au niveau du projet
+        engine = create_engine(f'sqlite:///{DATA_FILE}', echo=False)
 else:
     # Sinon, tente une connexion au niveau du projet
-    engine = create_engine(f'sqlite:///{DATA_FILE}', echo=True)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    engine = create_engine(f'sqlite:///{DATA_FILE}', echo=False)
 
+Session = sessionmaker(bind=engine)
+session = Session()
 Base = declarative_base()
 
 
