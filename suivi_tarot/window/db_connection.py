@@ -137,7 +137,7 @@ Veuillez rectifier ou créer une nouvelle base de données.""")
         """Enregistre le chemin de la bdd dans config.json et initialise
         l'initialise si c'est une création."""
         if self.rdb_new_database.isChecked():
-            add_path_database(self.le_path.text() + '\\db.sqlite3')
+            add_path_database(f'{self.le_path.text()}/db.sqlite3')
             init_bdd(self.le_path.text(), self.le_password.text())
         else:
             add_path_database(self.le_path.text())
