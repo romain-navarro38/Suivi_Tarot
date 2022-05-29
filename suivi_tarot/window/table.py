@@ -312,7 +312,7 @@ class TableWindow(QWidget):
         """Enregistre les joueurs participants"""
         insert_players_game(partie_id, self.players)
 
-    def save_donne(self, partie_id: int, row: int) -> int:
+    def save_donne(self, game_id: int, row: int) -> int:
         """Enregistre une donne de la partie et retourne son id généré"""
         column = ["preneur", "contrat", "nb_bout", "point", "poignee", "petit", "petit_chelem", "grand_chelem"]
         if self.number_players > 4:
@@ -328,7 +328,7 @@ class TableWindow(QWidget):
             self.dict_donne["pnj"] = self.tab_donne.cellWidget(row, 0).text()
         else:
             self.dict_donne["pnj"] = None
-        donne = Donne(partie_id=partie_id,
+        donne = Donne(game_id=game_id,
                       nb_bout=int(self.dict_donne["nb_bout"]),
                       contract=conversion_contract(self.dict_donne["contrat"]),
                       tete=self.dict_donne["tete"],
