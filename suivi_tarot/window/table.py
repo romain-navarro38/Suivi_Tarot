@@ -44,7 +44,7 @@ class TableWindow(QWidget):
         super().__init__()
 
         self.players = players
-        self.pnj = list(players)
+        self.available_pnj = list(players)
         self.number_players = len(players)
         self.score = {k: [0] for k in players}
         self.score_cumul = dict(self.score)
@@ -133,11 +133,11 @@ class TableWindow(QWidget):
         """Pour les sessions à 6 joueurs : tirage au sort d'un joueur qui devient
         pnj (personne non-joueur) de la donne"""
         previous_pnj = self.tab_donne.cellWidget(row - 1, 0).text() if row else ""
-        new_pnj = get_random_item_with_constraint(self.pnj, previous_pnj)
+        new_pnj = get_random_item_with_constraint(self.available_pnj, previous_pnj)
         self.tab_donne.cellWidget(row, 0).setText(new_pnj)
-        self.pnj.remove(new_pnj)
-        if len(self.pnj) == 0:
-            self.pnj = list(self.players)
+        self.available_pnj.remove(new_pnj)
+        if len(self.available_pnj) == 0:
+            self.available_pnj = list(self.players)
 
     def select_header(self):
         """Retourne l'entête adapté au nombre de joueurs"""
@@ -167,18 +167,20 @@ class TableWindow(QWidget):
 
     def dispatch_action(self, row, column=1):
         """Lance en fonction l'interaction de l'utilisateur :
-            - Fenêtre pnj pour le remplacer (conditions : 6 joueurs, aucune donne jouée)
-            - Fenêtre donne en mode ajout (conditions : btn_ajout_donne ou double clic dernière ligne)
-            - Fenêtre donne en mode modif (condition : double clic sur une ligne renseignée)"""
+            - Fenêtre remplacement pnj (conditions : 6 joueurs, double clic première colonne, donne encore non jouée)
+            - Fenêtre donne mode ajout (conditions : btn_ajout_donne ou double clic dernière ligne)
+            - Fenêtre donne mode modif (condition : double clic sur une ligne déjà renseignée)"""
         if (
-                self.number_players > 5
-                and self.tab_donne.rowCount() == 1
-                and row == 0
+                self.number_players == 6
                 and column == 0
-                and self.tab_donne.cellWidget(0, 1).text() == ""
+                and self.tab_donne.cellWidget(row, 1).text() == ""
+                and (row + 1) % 6 != 0
         ):
-            self.new_pnj = PnjWindow(self.pnj)
-            self.new_pnj.select_player.connect(self.replace_pnj)
+            players = self.available_pnj.copy()
+            if row != 0 and row % 6 == 0:
+                players.remove(self.tab_donne.cellWidget(row - 1, 0).text())
+            self.new_pnj = PnjWindow(players)
+            self.new_pnj.select_player.connect(partial(self.replace_pnj, row))
             self.new_pnj.setWindowModality(Qt.ApplicationModal)
             self.new_pnj.show()
         elif row == "add":
@@ -189,11 +191,12 @@ class TableWindow(QWidget):
             self.value_donne = self.get_value_donne(row)
             self.launch_donne(row)
 
-    def replace_pnj(self, pnj):
-        """Pour les sessions à 6 joueurs, remplace le pnj de la première donne."""
-        self.tab_donne.cellWidget(0, 0).setText(pnj)
-        self.pnj = list(self.players)
-        self.pnj.remove(pnj)
+    def replace_pnj(self, row: int, new_pnj: str):
+        """Sessions à 6 joueurs seulement, remplace le pnj de la donne."""
+        old_pnj = self.tab_donne.cellWidget(row, 0).text()
+        self.tab_donne.cellWidget(row, 0).setText(new_pnj)
+        self.available_pnj.append(old_pnj)
+        self.available_pnj.remove(new_pnj)
 
     def launch_donne(self, row):
         """Ouvre la fenêtre de saisi d'une donne en mode création ou ajout."""
@@ -308,9 +311,9 @@ class TableWindow(QWidget):
                   "table_": self.number_players if self.number_players < 6 else 5}
         return insert_new_game(**partie)
 
-    def save_players(self, partie_id: int):
+    def save_players(self, game_id: int):
         """Enregistre les joueurs participants"""
-        insert_players_game(partie_id, self.players)
+        insert_players_game(game_id, self.players)
 
     def save_donne(self, game_id: int, row: int) -> int:
         """Enregistre une donne de la partie et retourne son id généré"""
