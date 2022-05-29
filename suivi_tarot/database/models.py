@@ -4,13 +4,25 @@ from sqlalchemy import create_engine, Integer, Column, String, Boolean, ForeignK
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 from suivi_tarot.api.calcul import Contract, Poignee
-from suivi_tarot.api.utils import DATA_FILE
+from suivi_tarot.api.utils import CONFIG_FILE, DATA_FILE
+from suivi_tarot.database.manage import get_path_database
 
 
-engine = create_engine(f'sqlite:///{DATA_FILE}', echo=True)
+# Connexion à la base de données
+if CONFIG_FILE.exists():
+    # Vérification de l'existance d'une bdd valide
+    path, valid = get_path_database(".sqlite3")
+    if valid:
+        engine = create_engine(f'sqlite:///{path}', echo=True)
+        Session = sessionmaker(bind=engine)
+        session = Session()
+else:
+    # Sinon, tente une connexion au niveau du projet
+    engine = create_engine(f'sqlite:///{DATA_FILE}', echo=True)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
 Base = declarative_base()
-Session = sessionmaker(bind=engine)
-session = Session()
 
 
 class Player(Base):
@@ -134,3 +146,12 @@ class Pnj(Base):
 
     donne = relationship('Donne', back_populates='pnj')
     player = relationship('Player', back_populates='pnj')
+
+class Password(Base):
+    """Table servant à stocker le hash du mot de passe défini à la création de la
+    base de données ainsi que le sel associé"""
+    __tablename__ = 'password'
+
+    id_password = Column(Integer, primary_key=True, autoincrement=True)
+    hash_ = Column(String, nullable=False)
+    salt = Column(String, nullable=False)
