@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushBu
     QSizePolicy, QSpacerItem
 from PySide6.QtCore import Qt, QSize, Signal
 
-from suivi_tarot.api.utils import TETE
+from suivi_tarot.api.utils import HEAD
 from suivi_tarot.api.calcul import calcul_donne, point_preneur_float, Contract, Poignee, \
     distribution_point_between_attack_defense, conversion_contract, conversion_poignee
 
@@ -109,7 +109,7 @@ class DetailsWindow(QWidget):
         if self.number_players > 4:
             self.lbl_tete.setAlignment(Qt.AlignCenter)
             self.lbl_tete.setText("Tête")
-            self.cbx_tete.addItems(TETE)
+            self.cbx_tete.addItems(HEAD)
             self.cbx_tete.setCurrentIndex(-1)
             self.lbl_appele.setAlignment(Qt.AlignCenter)
             self.lbl_appele.setText("Appelé")
