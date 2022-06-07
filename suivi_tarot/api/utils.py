@@ -7,7 +7,7 @@ CUR_FILE = Path(__file__)
 ROOT_FOLDER = CUR_FILE.parent.parent.parent
 DATA_FILE = ROOT_FOLDER / "db.sqlite3"
 CONFIG_FILE = ROOT_FOLDER / "config.json"
-IMAGE_FOLDER = CUR_FILE.parent.parent / "ressource" / "image"
+IMAGE_FOLDER = ROOT_FOLDER / "ressource" / "image"
 
 HEADER_3_4 = ["Preneur",
               "Contrat",
