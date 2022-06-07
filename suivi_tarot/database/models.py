@@ -1,6 +1,5 @@
 """Représentation sous forme de classes via SQLAlchemy de la bdd"""
 
-
 from sqlalchemy import create_engine, Integer, Column, String, Boolean, ForeignKey, DateTime, Enum, Float
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
@@ -9,18 +8,19 @@ from suivi_tarot.api.utils import CONFIG_FILE, DATA_FILE
 from suivi_tarot.database.manage import get_path_database
 
 
+echo = True
 # Connexion à la base de données
 if CONFIG_FILE.exists():
     # Vérification de l'existance d'une bdd valide
     path, valid = get_path_database(".sqlite3")
     if valid:
-        engine = create_engine(f'sqlite:///{path}', echo=False)
+        engine = create_engine(f'sqlite:///{path}', echo=echo)
     else:
         # Sinon, tente une connexion au niveau du projet
-        engine = create_engine(f'sqlite:///{DATA_FILE}', echo=False)
+        engine = create_engine(f'sqlite:///{DATA_FILE}', echo=echo)
 else:
     # Sinon, tente une connexion au niveau du projet
-    engine = create_engine(f'sqlite:///{DATA_FILE}', echo=False)
+    engine = create_engine(f'sqlite:///{DATA_FILE}', echo=echo)
 
 Session = sessionmaker(bind=engine)
 session = Session()
