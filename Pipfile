@@ -9,6 +9,7 @@ matplotlib = "~=3.5.1"
 sqlalchemy = "~=1.4.31"
 pandas = "~=1.4.0"
 pillow = "==9.1.1"
+pyinstaller = "==5.1"
 
 [dev-packages]
 pytest = "~=7.0.0"
