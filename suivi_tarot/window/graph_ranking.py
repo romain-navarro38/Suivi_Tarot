@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from suivi_tarot.api.utils import COLOR_GRAPH
+from suivi_tarot.database.manage import get_player_color_graph
 
 
 # noinspection PyAttributeOutsideInit
@@ -48,7 +48,8 @@ class GraphWidget(QWidget):
         self.ax.set_xticks(list(range(point)))
         for i, (player, score) in enumerate(data.items()):
             if window == "table":
-                self.ax.plot(score, label=player, color=COLOR_GRAPH[i])
+                colors_graph = get_player_color_graph()
+                self.ax.plot(score, label=player, color=colors_graph[i])
             elif window == "ranking":
                 self.ax.plot(score, label=player)
                 self.ax.legend()

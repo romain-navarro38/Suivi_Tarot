@@ -13,7 +13,11 @@ from suivi_tarot.database.models import Donne
 from suivi_tarot.window.graph_ranking import GraphWidget
 from suivi_tarot.window.pnj import PnjWindow
 from suivi_tarot.window.donne import DetailsWindow
-from suivi_tarot.api.utils import HEADER_3_4, HEADER_5, HEADER_6, COLOR_GRAPH, get_random_item_with_constraint
+from suivi_tarot.api.utils import HEADER_3_4, HEADER_5, HEADER_6, get_random_item_with_constraint
+from suivi_tarot.database.manage import get_player_color_graph
+
+
+color_graph = get_player_color_graph()
 
 
 class LabelScore(QLabel):
@@ -29,7 +33,7 @@ class LabelScore(QLabel):
         if role == "form":
             self.setAlignment(Qt.AlignRight)
         elif role == "label":
-            self.setStyleSheet(f"color: {COLOR_GRAPH[self.number_label]};")
+            self.setStyleSheet(f"color: {color_graph[self.number_label]};")
             LabelScore.number_label += 1
 
 
@@ -52,6 +56,7 @@ class TableWindow(QWidget):
 
         self.setWindowTitle("Partie en cours")
         self.setup_ui()
+        self.showMaximized()
 
     def setup_ui(self):
         self.create_widgets()
