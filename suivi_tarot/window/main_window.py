@@ -1,6 +1,7 @@
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtWidgets import QWidget, QGroupBox, QPushButton, QHBoxLayout, QVBoxLayout
 
+from suivi_tarot.window.color_player import ColorPlayerWindow
 from suivi_tarot.window.ranking import RankingWindow
 from suivi_tarot.window.select_joueur import SelectPlayerWindow
 from suivi_tarot.window.gestion_joueur import ManagementPlayerWindow
@@ -63,6 +64,7 @@ class MainWindow(QWidget):
         self.btn_play.clicked.connect(self.new_game)
         self.btn_ranking.clicked.connect(self.display_ranking)
         self.btn_player.clicked.connect(self.management_player)
+        self.btn_color.clicked.connect(self.management_color)
 
     def new_game(self):
         """Ouvre la fenêtre de sélection des joueurs pour l'enregistrement
@@ -82,3 +84,9 @@ class MainWindow(QWidget):
         """Ouvre la fenêtre de gestion des joueurs"""
         self.manage_player = ManagementPlayerWindow(self)
         self.manage_player.show()
+
+    def management_color(self):
+        """Opens the color management window"""
+        self.color = ColorPlayerWindow()
+        self.color.setWindowModality(Qt.ApplicationModal)
+        self.color.show()
