@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QWidget, QGroupBox, QPushButton, QHBoxLayout, QVBo
 from suivi_tarot.window.color_player import ColorPlayerWindow
 from suivi_tarot.window.ranking import RankingWindow
 from suivi_tarot.window.select_joueur import SelectPlayerWindow
-from suivi_tarot.window.gestion_joueur import ManagementPlayerWindow
+from suivi_tarot.window.manage_player import ManagementPlayerWindow
 from suivi_tarot.window.table import LabelScore
 
 

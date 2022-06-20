@@ -265,13 +265,7 @@ class SelectDates(QWidget):
 
 
 if __name__ == '__main__':
-    from suivi_tarot.api.utils import DATA_FILE
-    from suivi_tarot.database.clients import init_bdd
-
-    if not DATA_FILE.exists():
-        init_bdd()
     app = QApplication()
     window = SelectDates()
     window.show()
     app.exec()
-    # print(get_first_and_last_day_of_period("janvier - juin", 2022))
