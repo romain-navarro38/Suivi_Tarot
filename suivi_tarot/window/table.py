@@ -69,6 +69,7 @@ class TableWindow(QWidget):
         self.tab_donne = QTableWidget(self)
         self.btn_add_row = QPushButton("Nouvelle donne")
         self.btn_valid_game = QPushButton("Valider partie")
+        self.btn_aborted = QPushButton("Abandonner")
         self.graph = GraphWidget(self)
         self.graph.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
         self.lbl_player = [LabelScore(f"{player} :", "label") for player in self.players]
@@ -98,6 +99,7 @@ class TableWindow(QWidget):
         self.main_layout.addWidget(self.tab_donne)
         self.button_layout.addWidget(self.btn_add_row)
         self.button_layout.addWidget(self.btn_valid_game)
+        self.button_layout.addWidget(self.btn_aborted)
         self.main_layout.addLayout(self.button_layout)
 
         self.graph_score_layout.addWidget(self.graph)
@@ -114,6 +116,7 @@ class TableWindow(QWidget):
         self.tab_donne.cellDoubleClicked.connect(self.dispatch_action)
         self.btn_add_row.clicked.connect(partial(self.dispatch_action, "add"))
         self.btn_valid_game.clicked.connect(self.valid_game)
+        self.btn_aborted.clicked.connect(self.close)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """Si la partie n'est sauvegardée, demande à l'utilisateur de confirmer l'abandon"""
