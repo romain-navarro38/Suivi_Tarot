@@ -35,7 +35,7 @@ class MainWindow(QWidget):
         self.gb_play = QGroupBox(self)
         self.btn_play = CustomButton("Jouer")
         self.btn_ranking = CustomButton("Classement\ngénéral")
-        self.btn_statistics = CustomButton("Statistique")
+        self.btn_statistics = CustomButton("Statistiques")
 
         self.gb_gestion = QGroupBox(self)
         self.btn_player = CustomButton("Joueur")
