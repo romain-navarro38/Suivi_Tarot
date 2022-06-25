@@ -133,4 +133,4 @@ dmypy.json
 .idea
 
 # Json config
-config.json
+settings.json

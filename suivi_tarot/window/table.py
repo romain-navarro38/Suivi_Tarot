@@ -14,7 +14,7 @@ from suivi_tarot.window.graph_ranking import GraphWidget
 from suivi_tarot.window.pnj import PnjWindow
 from suivi_tarot.window.donne import DetailsWindow
 from suivi_tarot.api.utils import HEADER_3_4, HEADER_5, HEADER_6, get_random_item_with_constraint
-from suivi_tarot.database.manage import get_player_color_graph
+from suivi_tarot.api.settings import get_player_color_graph
 
 
 color_graph = get_player_color_graph()

@@ -6,7 +6,7 @@ from random import choice
 CUR_FILE = Path(__file__)
 ROOT_FOLDER = CUR_FILE.parent.parent.parent
 DATA_FILE = ROOT_FOLDER / "db.sqlite3"
-CONFIG_FILE = ROOT_FOLDER / "config.json"
+SETTINGS_FILE = ROOT_FOLDER / "settings.json"
 IMAGE_FOLDER = ROOT_FOLDER / "ressource" / "image"
 
 HEADER_3_4 = ["Preneur",

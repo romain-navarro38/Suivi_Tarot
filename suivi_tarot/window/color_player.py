@@ -6,7 +6,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt, QSize
 
 from suivi_tarot.api.utils import COLOR_DEFAULT, COLOR_PREDEFINED, convert_hex_to_rgb, convert_rgb_to_hex
-from suivi_tarot.database.manage import get_player_color_graph, set_player_color_graph
+from suivi_tarot.api.settings import get_player_color_graph, set_player_color_graph
 
 
 def change_label_number(label, new_value):

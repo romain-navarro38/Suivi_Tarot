@@ -8,8 +8,8 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication
 
 from suivi_tarot.window.db_connection import BddWindow
-from suivi_tarot.api.utils import CONFIG_FILE
-from suivi_tarot.database.manage import create_config_file, get_path_database
+from suivi_tarot.api.utils import SETTINGS_FILE
+from suivi_tarot.api.settings import create_settings_file, get_path_database
 
 
 def init_app(application: QApplication, message: str, path_default: Path = ""):
@@ -21,8 +21,8 @@ def init_app(application: QApplication, message: str, path_default: Path = ""):
 
 if __name__ == '__main__':
     app = QApplication()
-    if not CONFIG_FILE.exists():
-        create_config_file()
+    if not SETTINGS_FILE.exists():
+        create_settings_file()
         init_app(app, "new")
 
     path, valid = get_path_database(".sqlite3")

@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from suivi_tarot.database.manage import get_player_color_graph
+from suivi_tarot.api.settings import get_player_color_graph
 
 
 # noinspection PyAttributeOutsideInit
