@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QApplication, QWidget, QRadioButton, QLineEdit, QP
 
 from suivi_tarot.api.check import path_is_existing_folder_or_file, check_length_str, Comparison
 from suivi_tarot.database.clients import init_bdd
-from suivi_tarot.database.manage import add_path_database
+from suivi_tarot.api.settings import add_path_database
 
 
 # noinspection PyAttributeOutsideInit

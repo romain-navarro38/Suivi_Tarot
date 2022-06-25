@@ -4,13 +4,13 @@ from sqlalchemy import create_engine, Integer, Column, String, Boolean, ForeignK
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 from suivi_tarot.api.calcul import Contract, Poignee
-from suivi_tarot.api.utils import CONFIG_FILE, DATA_FILE
-from suivi_tarot.database.manage import get_path_database
+from suivi_tarot.api.utils import SETTINGS_FILE, DATA_FILE
+from suivi_tarot.api.settings import get_path_database
 
 
 echo = False
 # Connexion à la base de données
-if CONFIG_FILE.exists():
+if SETTINGS_FILE.exists():
     # Vérification de l'existance d'une bdd valide
     path, valid = get_path_database(".sqlite3")
     if valid:
