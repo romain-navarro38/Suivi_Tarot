@@ -8,8 +8,9 @@ pyside6 = "~=6.2.3"
 matplotlib = "~=3.5.1"
 sqlalchemy = "~=1.4.31"
 pandas = "~=1.4.0"
-pillow = "==9.1.1"
+pillow = "==9.4.0"
 pyinstaller = "==5.1"
+future = "==0.18.3"
 
 [dev-packages]
 pytest = "~=7.0.0"
