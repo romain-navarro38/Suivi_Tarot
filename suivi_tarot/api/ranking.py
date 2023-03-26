@@ -72,7 +72,8 @@ class Ranking:
         """Ajoute une colonne pour chaque joueur au DataFrame donne et calcul les points
         du joueur pour chaque donne"""
         for player in self.distinct_player:
-            self.donne[player] = self.donne.apply(repartition_points_by_player, axis=1, player=player)
+            self.donne[player] = self.donne.apply(repartition_points_by_player,
+                                                  axis=1, player=player, table_of=self.table_of)
             self.cumul[player] = self.donne[player]
 
     def cumulative_points_per_game(self):
