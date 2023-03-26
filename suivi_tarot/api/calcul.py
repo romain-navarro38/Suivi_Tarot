@@ -138,19 +138,25 @@ def distribution_point_between_attack_defense(result: int,
     return preneur, appele, defense
 
 
-def repartition_points_by_player(donne: dict, player: str) -> int:
+def repartition_points_by_player(donne: dict, player: str, table_of: int) -> int:
     """Retourne les points à attribuer un à joueur en fonction de son rôle
     dans une donne"""
     nickname = player
 
-    if nickname in [donne['pnj'], donne['preneur'], donne['appele']]:
-        if nickname == donne['pnj']:
-            return 0
-        elif nickname == donne['appele']:
-            return donne['result']
-        else:
-            return donne['result'] * 4 if donne['appele'] in ['Chien', 'Solo'] else donne['result'] * 2
-    elif nickname in [donne['defense1'], donne['defense2'], donne['defense3'], donne['defense4']]:
-        return donne['result'] * -1
-    else:
-        return 0
+    match table_of:
+        case 5:
+            if nickname in [donne['pnj'], donne['preneur'], donne['appele']]:
+                if nickname == donne['pnj']:
+                    return 0
+                elif nickname == donne['appele']:
+                    return donne['result']
+                else:
+                    return donne['result'] * 4 if donne['appele'] in ['Chien', 'Solo'] else donne['result'] * 2
+            elif nickname in [donne['defense1'], donne['defense2'], donne['defense3'], donne['defense4']]:
+                return donne['result'] * -1
+            else:
+                return 0
+        case 4:
+            return donne['result'] * 3 if nickname == donne['preneur'] else donne['result'] * -1
+        case 3:
+            return donne['result'] * 2 if nickname == donne['preneur'] else donne['result'] * -1
