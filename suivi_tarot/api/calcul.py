@@ -157,6 +157,14 @@ def repartition_points_by_player(donne: dict, player: str, table_of: int) -> int
             else:
                 return 0
         case 4:
-            return donne['result'] * 3 if nickname == donne['preneur'] else donne['result'] * -1
+            if nickname == donne['preneur']:
+                return donne['result'] * 3
+            elif nickname in [donne['defense1'], donne['defense2'], donne['defense3']]:
+                return donne['result'] * -1
+            return 0
         case 3:
-            return donne['result'] * 2 if nickname == donne['preneur'] else donne['result'] * -1
+            if nickname == donne['preneur']:
+                return donne['result'] * 2
+            elif nickname in [donne['defense1'], donne['defense2']]:
+                return donne['result'] * -1
+            return 0
