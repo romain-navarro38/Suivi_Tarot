@@ -6,6 +6,7 @@ from suivi_tarot.api.settings import get_player_color_graph
 
 
 def interval_x_axis(point: int) -> int:
+    """Détermine l'interval entre les ticks de l'abscisse"""
     return 1 if point < 10 else point // 10
 
 
