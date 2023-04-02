@@ -5,9 +5,14 @@ from matplotlib.figure import Figure
 from suivi_tarot.api.settings import get_player_color_graph
 
 
+def interval_x_axis(point: int) -> int:
+    return 1 if point < 10 else point // 10
+
+
 # noinspection PyAttributeOutsideInit
 class GraphWidget(QWidget):
     """Widget pour l'affichage graphique des classements"""
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -15,8 +20,8 @@ class GraphWidget(QWidget):
         self.ax = self.figure.add_subplot()
         self.parent = parent
         rgb = self.parent.palette().color(QWidget.backgroundRole(self.parent)).toTuple()
-        self.figure.set_facecolor((rgb[0]/255, rgb[1]/255, rgb[2]/255))
-        self.ax.set_facecolor((rgb[0]/255, rgb[1]/255, rgb[2]/255))
+        self.figure.set_facecolor((rgb[0] / 255, rgb[1] / 255, rgb[2] / 255))
+        self.ax.set_facecolor((rgb[0] / 255, rgb[1] / 255, rgb[2] / 255))
         self.setup_ui()
 
     def setup_ui(self):
@@ -45,7 +50,7 @@ class GraphWidget(QWidget):
         """Génération des courbes"""
         self.ax.clear()
         self.ax.set_xlim(0, point)
-        self.ax.set_xticks(list(range(point)))
+        self.ax.set_xticks(list(range(0, point, interval_x_axis(point))))
         for i, (player, score) in enumerate(data.items()):
             if window == "table":
                 colors_graph = get_player_color_graph()
