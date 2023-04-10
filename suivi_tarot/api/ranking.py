@@ -15,11 +15,6 @@ class Ranking(Data):
         self.ranking: pd.DataFrame = self.cumul.cumsum()
         self.ranking.reset_index(inplace=True, drop=True)
 
-    @property
-    def number_of_game(self) -> int:
-        """Nombre de parties trouvées"""
-        return self.ranking.shape[0]
-
 
 if __name__ == '__main__':
     nb = 5
@@ -28,4 +23,4 @@ if __name__ == '__main__':
     rank = Ranking(depart, fin, nb)
     with pd.option_context("display.max_columns", None):
         print(rank.donne)
-    print(rank.donne.shape[0])
+    print(rank.number_of_donne)
