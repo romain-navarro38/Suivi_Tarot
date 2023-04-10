@@ -81,3 +81,24 @@ class Data:
         self.cumul['id_game'] = self.donne['id_game']
         self.cumul.reset_index(inplace=True, drop=True)
         self.cumul = self.cumul.groupby('id_game').sum()
+
+    @property
+    def number_of_donne(self) -> int:
+        """Nombre de donnes trouvées"""
+
+        return self.donne.shape[0]
+
+    @property
+    def number_of_game(self) -> int:
+        """Nombre de parties trouvées"""
+
+        return self.donne["id_game"].nunique()
+
+
+if __name__ == '__main__':
+    start = datetime(2023, 1, 1)
+    end = datetime(2023, 3, 31)
+    nb = 5
+    data = Data(start, end, nb)
+
+    print(data.donne)
