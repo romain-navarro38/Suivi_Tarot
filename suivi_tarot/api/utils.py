@@ -204,7 +204,7 @@ COLOR_PREDEFINED = {
     'Black': '#000000'
 }
 
-MAIN_STATISTICS = {
+MAIN_STATISTICS_5_PLAYERS = {
     "G": 0,
     "GS": 0,
     "GC": 0,
@@ -230,7 +230,23 @@ MAIN_STATISTICS = {
     "points_defense": 0,
 }
 
-GENERAL_STATISTICS = {
+MAIN_STATISTICS_3_OR_4_PLAYERS = {
+    "G": 0,
+    "GS": 0,
+    "GC": 0,
+    "0 bout": 0,
+    "1 bout": 0,
+    "2 bouts": 0,
+    "3 bouts": 0,
+    "nb_donne": 0,
+    "preneur": 0,
+    "defense": 0,
+    "points": 0,
+    "points_preneur": 0,
+    "points_defense": 0,
+}
+
+GENERAL_STATISTICS_5_PLAYERS = {
     "nb_players": 0,
     "players": [],
     "nb_games": 0,
@@ -246,6 +262,16 @@ GENERAL_STATISTICS = {
     "D ♣": 0,
     "D ♥": 0,
     "D ♦": 0,
+}
+
+GENERAL_STATISTICS_3_OR_4_PLAYERS = {
+    "nb_players": 0,
+    "players": [],
+    "nb_games": 0,
+    "nb_donnes": 0,
+    "G": 0,
+    "GS": 0,
+    "GC": 0,
 }
 
 SUB_STATISTICS = {
